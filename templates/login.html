@@ -1,0 +1,6 @@
+<form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Submit">
+<a href="{% url 'mainpage' %}">Go to main</a>
+</form>
