@@ -1,1 +1,1 @@
-web: python manage.py migrate; gunicorn tsspgallery.wsgi
+web: python manage.py migrate; gunicorn tsppgallery.wsgi
