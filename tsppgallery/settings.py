@@ -105,6 +105,10 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = 'staticfiles'
 
+AUTHENTICATION_BACKENDS = (
+    'gallery.gauth.ModelBackend',
+)
+
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )

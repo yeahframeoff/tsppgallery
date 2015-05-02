@@ -109,12 +109,13 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% comment %}<div class="form-group">
+                    <div class="form-group">
                         <label for="icode" class="col-md-3 control-label">Role</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" name="role" placeholder="">
+                        {% load templatetags %}
+                            {{ form.role|add_class:'form-control' }}
                         </div>
-                    </div>{% endcomment %}
+                    </div>
 
                     <div class="form-group">
                         <!-- Button -->
