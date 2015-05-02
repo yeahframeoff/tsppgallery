@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.core import validators
 from django.db import models
-from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin, UserManager, Permission
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin, UserManager, Permission, \
+    BaseUserManager
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import auth
@@ -190,6 +191,37 @@ class PermissionsMixin(models.Model):
             return True
 
         return auth.models._user_has_module_perms(self, app_label)
+
+
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def _create_user(self, username, email, password,
+                     is_staff, role, **extra_fields):
+        """
+        Creates and saves a User with the given username, email and password.
+        """
+        now = timezone.now()
+        if not username:
+            raise ValueError('The given username must be set')
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email,
+                          is_staff=is_staff, is_active=True,
+                          role=role,
+                          date_joined=now, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, username, email=None, role=Role.ARTIST, password=None, **extra_fields):
+        if role == Role.ADMIN:
+            raise ValueError(_('To create admin user create_superuser() instead.'))
+        return self._create_user(username, email, password, False, role,
+                                 **extra_fields)
+
+    def create_superuser(self, username, email, password, **extra_fields):
+        return self._create_user(username, email, password, True, Role.ADMIN,
+                                 **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
