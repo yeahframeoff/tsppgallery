@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import forms
 from django.core import validators
 from django.db import models
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin, UserManager, Permission, \
@@ -26,7 +26,7 @@ class Role(models.CharField):
             'max_length':2,
             'choices': self.ROLES_LIST,
             'default': self.ARTIST,
-            'verbose_name':_('groups'),
+            'verbose_name':_('roles'),
             'blank': True,
             'help_text':_('The role this user belongs to. A user will '
                           'get all permissions granted to this role'),
@@ -65,8 +65,8 @@ class ModelBackend(object):
     def _get_permissions(self, user_obj, obj):
         """
         Returns the permissions of `user_obj` from `from_name`. `from_name` can
-        be either "group" or "user" to return permissions from
-        `_get_group_permissions` or `_get_user_permissions` respectively.
+        be either "role" or "user" to return permissions from
+        `_get_role_permissions` or `_get_user_permissions` respectively.
         """
         if not user_obj.is_active or user_obj.is_anonymous() or obj is not None:
             return set()
@@ -129,20 +129,27 @@ class ModelBackend(object):
 class PermissionsMixin(models.Model):
     """
     A mixin class that adds the fields and methods necessary to support
-    Django's Group and Permission model using the ModelBackend.
+    Role and Permission model using the ModelBackend.
     """
     @property
     def is_superuser(self):
-        return self.role == self.ADMIN
+        return self.role == Role.ADMIN
     role = Role()
 
     class Meta:
         abstract = True
 
+    def get_user_permissions(self):
+        return self.get_role_permissions(self)
+
+    @property
+    def user_permissions(self):
+        return self.get_user_permissions()
+
     def get_role_permissions(self, obj=None):
         """
-        Returns a list of permission strings that this user has through their
-        groups. This method queries all available auth backends. If an object
+        Returns a list of permission strings that this user has through its
+        role. This method queries all available auth backends. If an object
         is passed in, only permissions matching this object are returned.
         """
         permissions = set()
@@ -270,12 +277,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
+        if not self.first_name and not self.last_name:
+            full_name = self.username
         full_name = '%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
         "Returns the short name for the user."
-
+        if not self.first_name and not self.last_name:
+            short_name = self.username
         short_name = "%.1s. %s" % (self.first_name, self.last_name)
         return short_name.strip()
 
@@ -287,7 +297,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         raise NotImplementedError()
 
 
-class UserCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
+class UserCreationForm(forms.UserCreationForm):
+    class Meta(forms.UserCreationForm.Meta):
         model = User
         fields = ('username', 'role')
+
+
+class UserChangeForm(forms.UserChangeForm):
+    class Meta(forms.UserChangeForm.Meta):
+        model = User
