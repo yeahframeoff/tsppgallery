@@ -42,3 +42,28 @@ class Organizer(User):
     objects = OrganizerManager()
     class Meta(User.Meta):
         proxy = True
+
+class Genre(models.Model):
+    name = models.CharField(max_length=32)
+
+
+class Drawing(models.Model):
+    image = models.ImageField(upload_to='images/%Y/%m/')
+    name = models.CharField(max_length=32)
+    description = models.TextField()
+    artist = models.ForeignKey(Artist, related_name='drawings', related_query_name='drawing')
+    genres = models.ManyToManyField(Genre, related_name='drawings', related_query_name='drawing')
+    hidden = models.BooleanField('спрятано', default=False)
+
+
+class Exhibition(models.Model):
+    images = models.ManyToManyField(
+        Drawing,
+        related_name='exhibitions',
+        related_query_name='exhibition',
+    )
+    organizer = models.ForeignKey(Organizer, related_name='exhibitions', related_query_name='exhibition')
+    name = models.CharField(max_length=32)
+    publish_date = models.DateField(auto_now=True)
+    approved = models.BooleanField(default=False)
+    genres = models.ManyToManyField(Genre, related_name='exhibitions', related_query_name='exhibition')

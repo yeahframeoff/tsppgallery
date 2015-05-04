@@ -261,6 +261,8 @@ class User(AbstractBaseUser, PermissionsMixin):
                     'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
+    photo = models.ImageField(_('user photo'), upload_to='userphotos', null=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
@@ -294,6 +296,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         # send_mail(subject, message, from_email, [self.email], **kwargs)
         raise NotImplementedError()
+
+    full_name = property(get_full_name)
 
 
 class UserCreationForm(forms.UserCreationForm):
