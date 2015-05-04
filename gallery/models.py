@@ -1,24 +1,44 @@
-from .gauth import Role, User, UserManager
 from django.db import models
-
-def make_user_proxy(role):
-    if role not in Role.ROLES_LIST:
-        raise ValueError('role must be the one from Role.ROLES_LIST')
-    class ProxyUserManager(UserManager):
-        def get_queryset(self):
-            return super(ProxyUserManager, self)\
-                .get_queryset().filter(role=role)
-
-    class TheProxy(User):
-        objects = ProxyUserManager()
-        class Meta(User.Meta):
-            proxy = True
-        def save(self, *args, **kwargs):
-            self.role = role
-            super(Admin, self).save(*args, **kwargs)
-    return TheProxy
+from .gauth import Role, User, UserManager
 
 
-Admin = make_user_proxy(Role.ADMIN)
-Artist = make_user_proxy(Role.ARTIST)
-Organizer = make_user_proxy(Role.ORGANIZER)
+class AdminManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=Role.ADMIN)
+
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        return super().create_user(username, email, Role.ADMIN, password, **extra_fields)
+
+
+class Admin(User):
+    objects = AdminManager()
+    class Meta(User.Meta):
+        proxy = True
+
+
+class ArtistManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=Role.ARTIST)
+
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        return super().create_user(username, email, Role.ARTIST, password, **extra_fields)
+
+
+class Artist(User):
+    objects = ArtistManager()
+    class Meta(User.Meta):
+        proxy = True
+
+
+class OrganizerManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=Role.ORGANIZER)
+
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        return super().create_user(username, email, Role.ORGANIZER, password, **extra_fields)
+
+
+class Organizer(User):
+    objects = OrganizerManager()
+    class Meta(User.Meta):
+        proxy = True

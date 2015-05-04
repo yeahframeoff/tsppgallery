@@ -31,8 +31,7 @@ class Role(models.CharField):
             'help_text':_('The role this user belongs to. A user will '
                           'get all permissions granted to this role'),
         }
-        for key in upd:
-            kwargs[key] = upd[key]
+        kwargs.update(upd)
         super(Role, self).__init__(*args, **kwargs)
 
 
