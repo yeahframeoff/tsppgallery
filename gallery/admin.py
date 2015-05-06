@@ -52,13 +52,16 @@ class ExhibitionHasDrawingsInline(admin.StackedInline):
 
 @admin.register(models.Drawing)
 class DrawingAdmin(admin.ModelAdmin):
-    inlines = [DrawingHasGenresInline]
+    inlines = (DrawingHasGenresInline,)
     fields = ('name', 'description', 'artist', 'image')
+    save_as = True
+    save_on_top = True
 
 
 @admin.register(models.Exhibition)
 class Exhibition(admin.ModelAdmin):
-    inlines = [ExhibitionHasGenresInline, ExhibitionHasDrawingsInline]
+    fields = ('name', 'organizer')
+    inlines = (ExhibitionHasGenresInline, ExhibitionHasDrawingsInline)
 
 
 admin.site.register(models.Genre)

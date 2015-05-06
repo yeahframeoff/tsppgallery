@@ -3,7 +3,7 @@ from .gauth import UserCreationForm
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
-from .models import Artist
+from .models import Artist, Organizer
 
 from django.views import generic as genericviews
 
@@ -29,3 +29,9 @@ class ArtistDetailView(genericviews.DetailView):
     model = Artist
     template_name = 'artist.html'
     context_object_name = 'artist'
+
+
+class OrganizerDetailView(genericviews.DetailView):
+    model = Organizer
+    template_name = 'organizer.html'
+    context_object_name = 'org'
