@@ -5,17 +5,21 @@ from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.admin import UserAdmin
 
 from . import gauth
-from .models import User
+from . import models
 
 
+admin.site.unregister(AuthDefaultGroup)
+
+@admin.register(models.User)
 class UserAdmin(UserAdmin):
     add_form_template = 'admin/auth/user/add_form.html'
     change_user_password_template = None
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Important dates'), {'fields': ('bio', 'photo')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff',
-                                       'role')}),
+                                       'role', )}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
@@ -34,5 +38,27 @@ class UserAdmin(UserAdmin):
     filter_horizontal = tuple()
 
 
-admin.site.unregister(AuthDefaultGroup)
-admin.site.register(User, UserAdmin)
+class DrawingHasGenresInline(admin.StackedInline):
+    model = models.Drawing.genres.through
+
+
+class ExhibitionHasGenresInline(admin.StackedInline):
+    model = models.Exhibition.genres.through
+
+
+class ExhibitionHasDrawingsInline(admin.StackedInline):
+    model = models.Exhibition.drawings.through
+
+
+@admin.register(models.Drawing)
+class DrawingAdmin(admin.ModelAdmin):
+    inlines = [DrawingHasGenresInline]
+    fields = ('name', 'description', 'artist', 'image')
+
+
+@admin.register(models.Exhibition)
+class Exhibition(admin.ModelAdmin):
+    inlines = [ExhibitionHasGenresInline, ExhibitionHasDrawingsInline]
+
+
+admin.site.register(models.Genre)

@@ -1,5 +1,6 @@
 from django.db import models
 from .gauth import Role, User, UserManager
+from django.utils.translation import ugettext_lazy as _
 
 
 class AdminManager(UserManager):
@@ -42,9 +43,16 @@ class Organizer(User):
     objects = OrganizerManager()
     class Meta(User.Meta):
         proxy = True
+        verbose_name = _('organizer')
+        verbose_name_plural = _('organizers')
 
 class Genre(models.Model):
     name = models.CharField(max_length=32)
+    __str__ = lambda self: self.name
+
+    class Meta:
+        verbose_name = _('genre')
+        verbose_name_plural = _('genres')
 
 
 class Drawing(models.Model):
@@ -54,10 +62,17 @@ class Drawing(models.Model):
     artist = models.ForeignKey(Artist, related_name='drawings', related_query_name='drawing')
     genres = models.ManyToManyField(Genre, related_name='drawings', related_query_name='drawing')
     hidden = models.BooleanField('спрятано', default=False)
+    date_uploaded = models.DateTimeField('загружено', auto_now=True)
+    __str__ = lambda self: self.name
+
+    class Meta:
+        verbose_name = _('drawing')
+        verbose_name_plural = _('drawings')
+
 
 
 class Exhibition(models.Model):
-    images = models.ManyToManyField(
+    drawings = models.ManyToManyField(
         Drawing,
         related_name='exhibitions',
         related_query_name='exhibition',
@@ -67,3 +82,8 @@ class Exhibition(models.Model):
     publish_date = models.DateField(auto_now=True)
     approved = models.BooleanField(default=False)
     genres = models.ManyToManyField(Genre, related_name='exhibitions', related_query_name='exhibition')
+
+    class Meta:
+        verbose_name = _('exhibition')
+        verbose_name_plural = _('exhibitions')
+

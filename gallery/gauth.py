@@ -261,7 +261,8 @@ class User(AbstractBaseUser, PermissionsMixin):
                     'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
-    photo = models.ImageField(_('user photo'), upload_to='userphotos', null=True)
+    photo = models.ImageField(_('User photo'), upload_to='userphotos', null=True)
+    bio = models.TextField(_('Biography'), blank=True)
 
     objects = UserManager()
 

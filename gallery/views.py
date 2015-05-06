@@ -3,6 +3,10 @@ from .gauth import UserCreationForm
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
+from .models import Artist
+
+from django.views import generic as genericviews
+
 
 def main(request):
     return render(request, 'mainpage.html')
@@ -19,3 +23,9 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
+
+
+class ArtistDetailView(genericviews.DetailView):
+    model = Artist
+    template_name = 'artist.html'
+    context_object_name = 'artist'

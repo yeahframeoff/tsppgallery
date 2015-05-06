@@ -1,48 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/bootstrap.css">
-    <script src="http://code.jquery.com/jquery-2.1.3.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <title></title>
-    <style>
-        .col-lg-4 > .affix.panel{
-            width: 100%;
-            height: 100%;
-        }
+{% extends 'base.html' %}
 
-        .media > div{
-            display: inline-block;
-        }
+{% block style %}
+    .col-lg-4 > .affix.panel{
+        width: 100%;
+        height: 100%;
+    }
 
-        .media > .media-body{
-            width: 75%;
-        }
-    </style>
-</head>
-<body>
+    .media > div{
+        display: inline-block;
+    }
+
+    .media > .media-body{
+        width: 75%;
+    }
+{% endblock %}
+
+{% block title %} User {{ artist.full_name }} {% endblock %}
+{% block content %}
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-8">
                 <div class="list-group">
+                {% for drawing in artist.drawings.all %}
                     <div class="list-group-item">
                         <div class="media">
                             <div class="media-left">
                                 <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
+                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64"
+                                         src="{{ drawing.image.url }}"
+                                         data-holder-rendered="true" style="width: 64px; height: 64px;">
                                 </a>
                             </div>
                             <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
+                                <h4 class="media-heading">{{ drawing.name }}</h4>
                                 <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
+                                    {% for genre in drawing.genres.all %}
+                                        <span class="label label-default">{{ genre }}</span>
+                                    {% endfor %}
                                 </h5>
                             </div>
                             <div class="imageBtn pull-right">
@@ -55,325 +49,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="#">
-                                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">Васина картина<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
-                                <h5>Теги:
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                    <span class="label label-default">New</span>
-                                </h5>
-                            </div>
-                            <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                {% endfor %}
                 </div>
             </div>
             <div class="col-lg-4">
@@ -381,20 +57,14 @@
                     <div class="row">
                         <div class="col-xs-6 col-md-3">
                             <a href="#" class="thumbnail">
-                                <img src="http://www.animalsglobe.ru/wp-content/uploads/2012/04/gornyiy-baran-71.jpg" alt="...">
+                                <img src="{{ artist.photo.url }}" alt="{{ artist.full_name }}">
                             </a>
-                            <h3>Вася</h3>
-                            <h4>
-                                Внешность у него замечательная: рост 189, вес 86, 33 года.
-                                Очень волосатые руки, которые так хочется гладить против шерсти.. .
-                                Замечательные глаза, как бесконечность, в которой можно исчезнуть бесследно.. .
-                                Редкие интеллект и тонкость...
-                            </h4>
+                            <h3>{{ artist.full_name }}</h3>
+                            <h4>{{ artist.bio }}</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
