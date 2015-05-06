@@ -60,7 +60,7 @@ class DrawingAdmin(admin.ModelAdmin):
 
 @admin.register(models.Exhibition)
 class Exhibition(admin.ModelAdmin):
-    fields = ('name', 'organizer')
+    fields = ('name', 'organizer', 'description')
     inlines = (ExhibitionHasGenresInline, ExhibitionHasDrawingsInline)
 
 

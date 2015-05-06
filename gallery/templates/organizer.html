@@ -18,7 +18,7 @@
                         <div class="row">
                             {% for drawing in xzibit.drawings.all %}
                                 <div class="col-xs-3">
-                                    <a href="#" class="thumbnail">
+                                    <a href="{{ drawing.get_absolute_url }}" class="thumbnail">
                                         <img data-src="holder.js/100%x180" alt="100%x180"
                                              src="{{ drawing.image.url }}" data-holder-rendered="true"
                                              style="height: 115px; width: 100%; display: block;">

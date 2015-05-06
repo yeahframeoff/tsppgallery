@@ -89,6 +89,10 @@ class Exhibition(models.Model):
     publish_date = models.DateField(auto_now=True)
     approved = models.BooleanField(default=False)
     genres = models.ManyToManyField(Genre, related_name='exhibitions', related_query_name='exhibition')
+    description = models.TextField('описание выставки')
+
+    def get_absolute_url(self):
+        return reverse('exhibition-view',args=[self.pk])
 
     class Meta:
         verbose_name = _('exhibition')

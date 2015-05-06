@@ -3,7 +3,7 @@ from .gauth import UserCreationForm
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
-from .models import Artist, Organizer, Drawing
+from .models import Artist, Organizer, Drawing, Exhibition
 
 from django.views import generic as genericviews
 
@@ -41,3 +41,9 @@ class DrawingDetailView(genericviews.DetailView):
     model = Drawing
     template_name = 'image-view.html'
     context_object_name = 'drawing'
+
+
+class ExhibitionDetailView(genericviews.DetailView):
+    model = Exhibition
+    template_name = 'exhibition-view.html'
+    context_object_name = 'xzibit'
