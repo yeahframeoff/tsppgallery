@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.db import models
 from .gauth import Role, User, UserManager
 from django.utils.translation import ugettext_lazy as _
@@ -29,6 +30,9 @@ class Artist(User):
     objects = ArtistManager()
     class Meta(User.Meta):
         proxy = True
+
+    def get_absolute_url(self):
+        return reverse('artist-detail',args=[self.pk])
 
 
 class OrganizerManager(UserManager):
@@ -64,6 +68,9 @@ class Drawing(models.Model):
     hidden = models.BooleanField('спрятано', default=False)
     date_uploaded = models.DateTimeField('загружено', auto_now=True)
     __str__ = lambda self: self.name
+
+    def get_absolute_url(self):
+        return reverse('drawing-view',args=[self.pk])
 
     class Meta:
         verbose_name = _('drawing')
