@@ -88,7 +88,13 @@ class Exhibition(models.Model):
     name = models.CharField(max_length=32)
     publish_date = models.DateField(auto_now=True)
     approved = models.BooleanField(default=False)
-    genres = models.ManyToManyField(Genre, related_name='exhibitions', related_query_name='exhibition')
+    genres = models.ManyToManyField(
+        Genre,
+        through='ExhibitionGenre',
+        through_fields=('exhibition', 'genre'),
+        related_name='exhibitions2',
+        related_query_name='exhibition2'
+    )
     description = models.TextField('описание выставки')
 
     def get_absolute_url(self):
@@ -98,3 +104,11 @@ class Exhibition(models.Model):
         verbose_name = _('exhibition')
         verbose_name_plural = _('exhibitions')
 
+
+class ExhibitionGenre(models.Model):
+    exhibition = models.ForeignKey(Exhibition)
+    genre = models.ForeignKey(Genre)
+    priority = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('exhibition', 'genre')
