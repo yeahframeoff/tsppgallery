@@ -17,6 +17,7 @@
 {% endblock %}
 
 {% block content %}
+    {% load templatetags %}
     <div class="row">
         <div class="col-lg-8">
             <div class="list-group">
@@ -29,9 +30,11 @@
                             </a>
                         </div>
                         <div class="media-body">
-                            <h4 class="media-heading">{{ drawing.name }}<a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a></h4>
+                            <h4 class="media-heading">{{ drawing.name }}
+                                <a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a>
+                            </h4>
                             <h5>Теги:
-                                {% for genre in drawing.genres.all %}
+                                {% for genre in drawing.genres.all|order_by:"drawinggenre__priority" %}
                                     <span class="label label-default">{{ genre.name }}</span>
                                 {% endfor %}
                             </h5>

@@ -64,7 +64,13 @@ class Drawing(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()
     artist = models.ForeignKey(Artist, related_name='drawings', related_query_name='drawing')
-    genres = models.ManyToManyField(Genre, related_name='drawings', related_query_name='drawing')
+    genres = models.ManyToManyField(
+        Genre,
+        through='DrawingGenre',
+        through_fields=('drawing', 'genre'),
+        related_name='drawings',
+        related_query_name='drawing'
+    )
     hidden = models.BooleanField('спрятано', default=False)
     date_uploaded = models.DateTimeField('загружено', auto_now=True)
     __str__ = lambda self: self.name
@@ -92,17 +98,36 @@ class Exhibition(models.Model):
         Genre,
         through='ExhibitionGenre',
         through_fields=('exhibition', 'genre'),
-        related_name='exhibitions2',
-        related_query_name='exhibition2'
+        related_name='exhibitions',
+        related_query_name='exhibition'
     )
     description = models.TextField('описание выставки')
 
     def get_absolute_url(self):
         return reverse('exhibition-view',args=[self.pk])
 
+    def __str__(self):
+        return '%d %s' % (self.pk, self.name)
+
     class Meta:
         verbose_name = _('exhibition')
         verbose_name_plural = _('exhibitions')
+        ordering = ('id',)
+
+
+class DrawingGenre(models.Model):
+    drawing = models.ForeignKey(Drawing)
+    genre = models.ForeignKey(Genre)
+    priority = models.PositiveIntegerField()
+
+    def __str__(self):
+        return "%d: drawing:%d, num:%d, genre:%d" %\
+               (self.pk, self.drawing_id, self.priority, self.genre_id)
+
+    class Meta:
+        unique_together = ('drawing', 'genre')
+        ordering = ('drawing_id', 'priority')
+
 
 
 class ExhibitionGenre(models.Model):
@@ -110,5 +135,10 @@ class ExhibitionGenre(models.Model):
     genre = models.ForeignKey(Genre)
     priority = models.PositiveIntegerField()
 
+    def __str__(self):
+        return "%d: xzibit:%d, num:%d, genre:%d" %\
+               (self.pk, self.exhibition_id, self.priority, self.genre_id)
+
     class Meta:
         unique_together = ('exhibition', 'genre')
+        ordering = ('exhibition_id', 'priority')

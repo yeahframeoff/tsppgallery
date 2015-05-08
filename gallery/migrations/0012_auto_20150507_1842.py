@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
+
 def main_op(apps, schema_editor):
     """
     Populates models.Exhibition.genres2 to Genre intermediate
@@ -15,7 +16,7 @@ def main_op(apps, schema_editor):
     exhibitions = Exhibition.objects.all()
     for xzibit in exhibitions:
         bulk = []
-        xzibit_genres =\
+        xzibit_genres = \
             xzibit.genres.all()
         i = 0
         for genre in xzibit_genres:
@@ -34,7 +35,7 @@ def reverse_op(apps, schema_editor):
     ExhibitionGenreOld = Exhibition.genres.through
     ExhibitionGenreNew = apps.get_model('gallery', 'ExhibitionGenre')
     ExhibitionGenreOld.objects.all().delete()
-    pivots =\
+    pivots = \
         [
             ExhibitionGenreOld(
                 genre=x.genre,
@@ -49,7 +50,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('gallery', '0011_auto_20150507_1820'),
-    ]
+        ]
 
     operations = [
         migrations.RunPython(main_op, reverse_op)
