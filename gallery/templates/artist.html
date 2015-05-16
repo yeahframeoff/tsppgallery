@@ -1,18 +1,20 @@
 {% extends 'base-cf.html' %}
 
 {% block style %}
-    .col-lg-4 > .affix.panel{
-    width: 100%;
-    height: 100%;
-    }
+    <style>
+        .col-lg-4 > .affix.panel{
+            width: 100%;
+            height: 100%;
+        }
 
-    .media > div{
-    display: inline-block;
-    }
+        .media > div{
+            display: inline-block;
+        }
 
-    .media > .media-body{
-    width: 75%;
-    }
+        .media > .media-body{
+            width: 75%;
+        }
+    </style>
 {% endblock %}
 
 {% block title %} User {{ artist.full_name }} {% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'base-cf.html' %}
+{% block title %} {% endblock %}
+
+{% block style %}
+    <style>
+        .col-lg-4 > .affix.panel {
+            width: 100%;
+            height: 100%;
+        }
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block script %}
+    <script>
+        var genres = [], genresCopy;
+        var allGenres = [];
+        var freeGenres = [];
+
+        function saveGenres() {
+            genresCopy = genres.slice(0, genres.length);
+        };
+
+        function restoreGenres() {
+            genres = genresCopy;
+        }
+
+        function reportToServer(successCallback, failCallback) {
+            var success = false;
+            genres_ids = $.map(genres, function(x) { return x.id; });
+            var stringified = genres_ids.join(',');
+            console.log(stringified);
+            $.post("{% url 'drawing-genres-update' drawing.pk %}",
+                {
+                    'ids_order':stringified,
+                    'csrfmiddlewaretoken':"{{ csrf_token }}"
+                },
+                'json'
+            ).done(function(data) {
+                success = !!data.success;
+            }).always(function() {
+                success ? successCallback() : failCallback();
+            });
+        }
+
+        function up(i){
+            saveGenres();
+            if (i>0){
+                var genre = genres[i-1];
+                genres[i-1] = genres[i];
+                genres[i] = genre;
+            }
+            reportToServer(showList, restoreGenres);
+        }
+
+        function down(i){
+            saveGenres();
+            if (i<genres.length-1){
+                var genre = genres[i+1];
+                genres[i+1] = genres[i];
+                genres[i] = genre;
+            }
+            reportToServer(showList, restoreGenres);
+        }
+
+        function removeGenre(i){
+            genres.splice(i,1);
+            showList();
+            refreshFree();
+            $.post( "path", JSON.stringify(genres));
+        }
+
+        function add(i){
+            genres.push(freeGenres[i]);
+            refreshFree();
+            showList();
+        }
+
+        function showList(){
+            var elem = $('#genreList');
+            elem.html('');
+            for (var i=0; i<genres.length; i++){
+                elem.append(
+
+                        '<li class="list-group-item" style="height: 56px; line-height: 34px;">'+
+                        genres[i].name+
+                        '<button type="button" class="btn btn-danger pull-right" style="margin-left: 4px"onclick="removeGenre('+i+')">'+
+                        '<span class="glyphicon glyphicon-remove"></span>'+
+                        '</button>'+
+                        '<div class="btn-group pull-right" role="group">'+
+                        '<button type="button" class="btn btn-default"onclick="up('+i+')">'+
+                        '<span class="glyphicon glyphicon-chevron-up"></span>'+
+                        '</button>'+
+                        '<button type="button" class="btn btn-default"onclick="down('+i+')">'+
+                        '<span class="glyphicon glyphicon-chevron-down"></span>'+
+                        '</button>'+
+                        '</div>'+
+                        '</li>'
+                );
+            }
+        }
+
+        function showFreeList(){
+            var elem = $('#menu3');
+            elem.html('');
+            for (var i=0; i<freeGenres.length; i++){
+                elem.append(
+                        '<li role="presentation" onclick="add('+i+')"><a>'+
+                        freeGenres[i].name+
+                        '</a></li>'
+                );
+            }
+        }
+
+        function refreshFree(){
+            var t = allGenres.slice(0, allGenres.length);
+            var k;
+            for (var i =0; i < genres.length; i++) {
+                k = -1;
+                for (var j = 0; j < t.length; j++) {
+                    if (t[j].id == genres[i].id) {
+                        k = j;
+                        break;
+                    }
+                }
+                if (k >= 0)
+                    t.splice(k, 1);
+            }
+            freeGenres = t;
+            showFreeList();
+        }
+
+        $(function(){
+            $.getJSON("{% url 'drawing-genres' pk=drawing.pk %}", function (data){
+                genres = data;
+                showList();
+                //exclude = $.map(data, function(x) { return x.id; }).join(',');
+                exclude = [];
+                $.getJSON("{% url 'genres' %}",
+                        { 'exclude' : exclude },
+                        function(data1){
+                            console.log(data1)
+                            allGenres = data1;
+                            refreshFree();
+                        });
+            })
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+            <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" src="http://www.veseloeradio.ru/vardata/modules/lenta/images/140000/132120_1_1291477583.jpg">
+            <div class="well center-block" style="margin-top: 12px; max-width: 400px;">
+                <input type="file" id="exampleInputFile" style="display: none;">
+                <label for="exampleInputFile" class="btn btn-primary btn-lg btn-block">Upload</label>
+                <button style="margin-top: 12px" type="button" class="btn btn-warning btn-lg">
+                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                </button>
+                <button style="margin-top: 12px" type="button" class="btn btn-success btn-lg pull-right">
+                    <span class="glyphicon glyphicon-ok">OK</span>
+                </button>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="affix pull-right panel">
+                <div class="row">
+                    <div class="col-xs-6 col-md-3">
+                        <h4>Name</h4>
+                        <input type="text" class="form-control" placeholder="Name">
+                        <h4>Genres</h4>
+                        <ul class="list-group" id="genreList">
+                        </ul>
+                        <div class="dropdown">
+                            <button class="btn btn-primary pull-right" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            </button>
+                            <ul id="menu3" class="dropdown-menu pull-right" role="menu" aria-labelledby="drop6">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
