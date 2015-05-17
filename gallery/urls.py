@@ -16,7 +16,9 @@ urlpatterns = (
     url(r'^drawings/(?P<pk>\d+)/genres/?$', views.DrawingGenresListView.as_view(), name='drawing-genres'),
     url(r'^drawings/(?P<drawing_id>\d+)/genres/update/?$', views.update_drawing_genres_order, name='drawing-genres-update'),
     url(r'^exhibitions/(?P<pk>\d+)/?$', views.ExhibitionDetailView.as_view(), name='exhibition-detail'),
-    # url(r'^exhibitions/(?P<pk>\d+)/edit/?$', views.ExhibitionEditView.as_view(), name='exhibition-edit'),
+    url(r'^exhibitions/(?P<pk>\d+)/edit/?$', views.ExhibitionEditView.as_view(), name='exhibition-edit'),
     # url(r'^exhibitions/create/?$', views.ExhibitionCreateView.as_view(), name='exhibition-create'),
+    url(r'^exhibitions/(?P<pk>\d+)/genres/?$', views.ExhibitionGenresListView.as_view(), name='exhibition-genres'),
+    url(r'^exhibitions/(?P<exhibition_id>\d+)/genres/update/?$', views.update_exhibition_genres_order, name='exhibition-genres-update'),
     url(r'^genres/?$', views.GenresView.as_view(), name='genres')
 )

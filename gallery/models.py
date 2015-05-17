@@ -76,7 +76,7 @@ class Drawing(models.Model):
     __str__ = lambda self: self.name
 
     def get_absolute_url(self):
-        return reverse('drawing-view',args=[self.pk])
+        return reverse('drawing-detail',args=[self.pk])
 
     class Meta:
         verbose_name = _('drawing')

@@ -5,7 +5,7 @@ from django.http import \
     HttpResponseBadRequest, JsonResponse
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
-from .models import Artist, Organizer, Drawing, Exhibition, DrawingGenre, Genre
+from .models import Artist, Organizer, Drawing, Exhibition, DrawingGenre, Genre, ExhibitionGenre
 
 from django.views import generic as genericviews
 import json
@@ -126,6 +126,15 @@ class DrawingGenresListView(ViewAjaxGetMixin, genericviews.ListView):
         return Drawing.objects.get(pk=pk).genres.order_by('drawinggenre__priority').all();
 
 
+class ExhibitionGenresListView(ViewAjaxGetMixin, genericviews.ListView):
+    fields_to_serialize = ('id', 'name')
+    query_args = ('pk',)
+
+    def get_queryset(self, **kwargs):
+        pk = kwargs['pk']
+        return Exhibition.objects.get(pk=pk).genres.order_by('exhibitiongenre__priority').all();
+
+
 def update_drawing_genres_order(request, drawing_id):
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
@@ -142,5 +151,24 @@ def update_drawing_genres_order(request, drawing_id):
     for num, id in ids_list:
         bulk.append(DrawingGenre(genre_id=id, priority=num))
     Drawing.objects.get(pk=drawing_id).drawinggenre_set = bulk
+    return JsonResponse({'success': True})
+
+
+def update_exhibition_genres_order(request, exhibition_id):
+    ids_list = request.POST.get('ids_order', None)
+    if not ids_list:
+        return HttpResponseBadRequest()
+    ids_list = ids_list.split(',')
+    length = len(ids_list)
+    ids_list = (int(id) for id in ids_list)
+    ids_list = (
+        (num, id) for num, id in
+        zip(range(1, length + 1), ids_list)
+    )
+    bulk = []
+    ExhibitionGenre.objects.filter(exhibition_id=exhibition_id).delete()
+    for num, id in ids_list:
+        bulk.append(ExhibitionGenre(genre_id=id, priority=num))
+    Exhibition.objects.get(pk=exhibition_id).exhibitiongenre_set = bulk
     return JsonResponse({'success': True})
 
