@@ -24,46 +24,39 @@
         <div class="col-lg-8">
             <div class="list-group">
                 {% for drawing in xzibit.drawings.all %}
-                <div class="list-group-item">
-                    <div class="media">
-                        <div class="media-left">
-                            <a href="{{ drawing.get_absolute_url }}">
-                                <img class="media-object" data-src="holder.js/64x64" alt="64x64" src="{{ drawing.image.url }}" data-holder-rendered="true" style="width: 64px; height: 64px;">
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">{{ drawing.name }}
-                                <a class="anchorjs-link" href="#media-heading"><span class="anchorjs-icon"></span></a>
-                            </h4>
-                            <h5>Теги:
-                                {% for genre in drawing.genres.all|order_by:"drawinggenre__priority" %}
-                                    <span class="label label-default">{{ genre.name }}</span>
-                                {% endfor %}
-                            </h5>
-                        </div>
-                        <div class="imageBtn pull-right">
-                            <button type="button" class="btn btn-danger">
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    {% include 'drawing-tile.html' with drawing=drawing %}
                 {% endfor %}
             </div>
-            <button type="button" class="btn btn-primary btn-lg pull-right">
-                <span class="glyphicon glyphicon-plus"></span>
-            </button>
+            {% if xzibit.organizer.pk == user.pk %}
+                <a type="button" class="btn btn-warning"
+                        href="{% url 'exhibition-edit' xzibit.pk %}">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+                <button type="button" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            {% endif %}
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">
                 <div class="row">
                     <div class="col-xs-6 col-md-3">
+                        <h2>{{ xzibit.name }}</h2>
                         <h3>Description</h3>
                         <p>{{ xzibit.description }}</p>
-
-                        <button type="button" class="btn btn-success btn-lg btn-block">
-                            Publish
-                        </button>
+                        {% if xzibit.approved %}
+                            <p class="text-success">Approved</p>
+                        {% else %}
+                            <p class="text-muted">Not approved</p>
+                        {% endif %}
+                        <h3>Genres</h3>
+                        <ul class="list-group">
+                            {% for genre in xzibit.genres.all|order_by:'exhibitiongenre__priority' %}
+                            <li class="list-group-item" style="height: 56px; line-height: 34px;">
+                                {{ genre.name }}
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>

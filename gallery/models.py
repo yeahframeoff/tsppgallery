@@ -59,7 +59,7 @@ class Organizer(User):
 
     def owns(self, exhibition):
         if not isinstance(exhibition, Exhibition):
-            return Exhibition.objects.filter(pk=exhibition, organizer=self).exists()
+            return Exhibition.objects.filter(pk=exhibition, organizer=self.id).exists()
         else:
             return exhibition.organizer_id == self.id or \
                    exhibition.organizer_id == self.id.id

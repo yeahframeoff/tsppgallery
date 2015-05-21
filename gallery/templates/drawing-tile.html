@@ -1,0 +1,31 @@
+{% load templatetags %}
+<div class="list-group-item">
+    <div class="media">
+        <div class="media-left">
+            <a href="{{ drawing.get_absolute_url }}">
+                <img class="media-object" data-src="holder.js/64x64" alt="64x64"
+                     src="{{ drawing.image.url }}"
+                     data-holder-rendered="true" style="width: 64px; height: 64px;">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading"><a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a></h4>
+            <h5>Genres:
+                {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
+                    <span class="label label-default">{{ genre }}</span>
+                {% endfor %}
+            </h5>
+        </div>
+        <div class="imageBtn pull-right">
+            {% if drawing.artist.pk == user.pk %}
+            <a type="button" class="btn btn-warning"
+                    href="{% url 'drawing-edit' drawing.pk %}">
+                <span class="glyphicon glyphicon-pencil"></span>
+            </a>
+            <button type="button" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>

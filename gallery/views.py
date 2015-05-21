@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.shortcuts import render
 from .gauth import UserCreationForm
 from django.http import \
@@ -74,23 +75,6 @@ class DrawingForm(forms.ModelForm):
         return instance
 
 
-class DrawingEditView(genericviews.UpdateView):
-    model = Drawing
-    template_name = 'drawing-edit.html'
-    context_object_name = 'drawing'
-    fields = ('image', 'name', 'description')
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_artist:
-            return HttpResponseForbidden('Only artists can edit drawings')
-        elif int(kwargs.get('pk', 0)) <= 0:
-            return HttpResponseBadRequest('Bad drawing id')
-        elif not Artist(request.user).owns(kwargs.get('pk', 0)):
-            return HttpResponseForbidden('Artists can edit their drawings only')
-        else:
-            return super().dispatch(request, args, kwargs)
-
-
 def create_drawing_view(request):
     if request.method == 'POST':
         form = DrawingForm(request.POST, request.FILES)
@@ -104,16 +88,61 @@ def create_drawing_view(request):
     return render(request, 'drawing-edit.html', {'form': form})
 
 
+class DrawingEditView(genericviews.UpdateView):
+    model = Drawing
+    template_name = 'drawing-edit.html'
+    context_object_name = 'drawing'
+    fields = ('image', 'name', 'description')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_artist:
+            return HttpResponseForbidden('Only artists can edit drawings')
+        elif int(kwargs.get('pk', 0)) <= 0:
+            return HttpResponseBadRequest('Bad drawing id')
+        elif not Artist(request.user).owns(int(kwargs.get('pk', 0))):
+            return HttpResponseForbidden('Artists can edit their drawings only')
+        else:
+            return super().dispatch(request, args, kwargs)
+
+
 class ExhibitionDetailView(genericviews.DetailView):
     model = Exhibition
     template_name = 'exhibition-view.html'
     context_object_name = 'xzibit'
 
 
-class ExhibitionCreateView(genericviews.CreateView):
-    model = Exhibition
-    template_name = 'exhibition-edit.html'
-    context_object_name = 'xzibit'
+class ExhibitionForm(forms.ModelForm):
+    class Meta:
+        model = Exhibition
+        fields = ('name', 'description')
+
+    def save(self, commit=True):
+        instance = super().save()
+        ids_list = self.ids_list.split(',')
+        length = len(ids_list)
+        ids_list = (int(id) for id in ids_list)
+        ids_list = (
+            (num, id) for num, id in
+            zip(range(1, length + 1), ids_list)
+        )
+        bulk = []
+        for num, id in ids_list:
+            bulk.append(ExhibitionGenre(genre_id=id, priority=num))
+        Exhibition.objects.get(pk=instance.pk).exhibitiongenre_set = bulk
+        return instance
+
+
+def create_exhibition_view(request):
+    if request.method == 'POST':
+        form = ExhibitionForm(request.POST)
+        form.instance.organizer = Organizer.objects.get(pk=request.user.pk)
+        if form.is_valid():
+            form.ids_list = request.session.get('exhibition_genres_ids_list', '')
+            instance = form.save()
+            return HttpResponseRedirect(instance.get_absolute_url())
+    else:
+        form = ExhibitionForm()
+    return render(request, 'exhibition-edit.html', {'form': form})
 
 
 class ExhibitionEditView(genericviews.UpdateView):
@@ -121,6 +150,16 @@ class ExhibitionEditView(genericviews.UpdateView):
     template_name = 'exhibition-edit.html'
     context_object_name = 'xzibit'
     fields = ('name', 'description')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_organizer:
+            return HttpResponseForbidden('Only organizers can edit exhibitions')
+        elif int(kwargs.get('pk', 0)) <= 0:
+            return HttpResponseBadRequest('Bad exhibition id')
+        elif not Organizer(request.user).owns(int(kwargs.get('pk', 0))):
+            return HttpResponseForbidden('Organizers can edit their drawings only')
+        else:
+            return super().dispatch(request, args, kwargs)
 
 
 class ViewAjaxOnlyMixin(object):
@@ -152,14 +191,24 @@ class ViewAjaxGetMixin(ViewAjaxOnlyMixin, ViewReturnJsonMixin):
 
 class GenresView(ViewAjaxGetMixin, genericviews.ListView):
     fields_to_serialize = ('id', 'name')
+    model = Genre
 
-    def get_queryset(self, **kwargs):
-        exclude = self.request.GET.get('exclude', None)
-        qs = Genre.objects.all()
-        if exclude:
-            exclude = [int(val) for val in exclude.split(',')]
-            qs = qs.exclude(id__in=exclude)
-        return qs
+
+class DrawingsView(ViewAjaxGetMixin, genericviews.ListView):
+    fields_to_serialize = ('id', 'name', 'image', 'genres')
+    queryset = Drawing.objects.filter(hidden=False).prefetch_related('genres');
+
+    def render(self, queryset):
+        values = [
+            {
+                'id': x.id,
+                'name': x.name,
+                'url': x.image.url,
+                'genres' : [g.name for g in x.genres.all()]
+            }
+            for x in queryset
+        ]
+        return json.dumps(values)
 
 
 class DrawingGenresListView(ViewAjaxGetMixin, genericviews.ListView):
@@ -182,6 +231,28 @@ class ExhibitionGenresListView(ViewAjaxGetMixin, genericviews.ListView):
             .order_by('exhibitiongenre__priority').all();
 
 
+class ExhibitionDrawingsListView(ViewAjaxGetMixin, genericviews.ListView):
+    fields_to_serialize = ('id', 'name', 'image')
+    query_args = ('pk',)
+
+    def render(self, queryset):
+        values = [
+            {
+                'id': x.id,
+                'name': x.name,
+                'url': x.image.url,
+                'genres' : [g.name for g in x.genres.all()]
+            }
+            for x in queryset
+        ]
+        return json.dumps(values)
+
+    def get_queryset(self, **kwargs):
+        pk = kwargs['pk']
+        return Exhibition.objects.get(pk=pk)\
+            .drawings.all().prefetch_related('genres');
+
+
 def update_drawing_genres_order(request, drawing_id):
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
@@ -199,13 +270,6 @@ def update_drawing_genres_order(request, drawing_id):
         bulk.append(DrawingGenre(genre_id=id, priority=num))
     Drawing.objects.get(pk=drawing_id).drawinggenre_set = bulk
     return JsonResponse({'success': True})
-
-
-def preupdate_drawing_genres_order(request):
-    ids_list = request.POST.get('ids_order', None)
-    request.session['drawing_genres_ids_list'] = ids_list
-    return JsonResponse({'success': True})
-
 
 def update_exhibition_genres_order(request, exhibition_id):
     ids_list = request.POST.get('ids_order', None)
@@ -225,3 +289,25 @@ def update_exhibition_genres_order(request, exhibition_id):
     Exhibition.objects.get(pk=exhibition_id).exhibitiongenre_set = bulk
     return JsonResponse({'success': True})
 
+def preupdate_drawing_genres_order(request):
+    ids_list = request.POST.get('ids_order', None)
+    request.session['drawing_genres_ids_list'] = ids_list
+    return JsonResponse({'success': True})
+
+def preupdate_exhibition_genres_order(request):
+    ids_list = request.POST.get('ids_order', None)
+    request.session['exhibition_genres_ids_list'] = ids_list
+    return JsonResponse({'success': True})
+
+def update_exhibition_drawings_list(request, exhibition_id):
+    ids_list = request.POST.get('ids_order', None)
+    if not ids_list:
+        return HttpResponseBadRequest()
+    ids_list = [int(id) for id in ids_list.split(',')]
+    Exhibition.objects.get(pk=exhibition_id).drawings = ids_list
+    return JsonResponse({'success': True})
+
+def preupdate_exhibition_drawings_list(request, exhibition_id):
+    ids_list = request.POST.get('ids_order', None)
+    request.session['exhibition_drawings_ids_list'] = ids_list
+    return JsonResponse({'success': True})

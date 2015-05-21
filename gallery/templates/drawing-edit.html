@@ -41,31 +41,31 @@
             const isNewEntry = {% if drawing %} false {% else %} true {% endif %};
             const updateGenresOrderUrl =
                 {% if drawing %}
-                    "{% url 'drawing-genres-update' drawing.pk %}"
+                    "{% url 'drawing-drawings-update' drawing.pk %}"
                 {% else %}
-                    "{% url 'drawing-genres-preupdate'%}"
+                    "{% url 'drawing-drawings-preupdate'%}"
                 {% endif %};
-            const getGenresUrl = "{% url 'genres' %}";
+            const getGenresUrl = "{% url 'drawings' %}";
             {% if drawing %}
-            const getDrawingGenresUrl = "{% url 'drawing-genres' pk=drawing.pk %}";
+            const getDrawingGenresUrl = "{% url 'drawing-drawings' pk=drawing.pk %}";
             {% endif %}
             Genre = {
-                genres: [],
-                genresCopy: null,
-                allGenres: [],
-                freeGenres: [],
+                drawings: [],
+                drawingsCopy: null,
+                allDrawings: [],
+                freeDrawings: [],
 
-                saveGenres: function () {
-                    this.genresCopy = this.genres.slice(0, this.genres.length);
+                saveDrawings: function () {
+                    this.drawingsCopy = this.drawings.slice(0, this.drawings.length);
                 },
 
-                restoreGenres: function () {
-                    this.genres = this.genresCopy;
+                restoreDrawings: function () {
+                    this.drawings = this.drawingsCopy;
                 },
 
                 reportToServer: function (successCallback, failCallback) {
                     var success = false;
-                    var genres_ids = $.map(this.genres, function(x) { return x.id; });
+                    var genres_ids = $.map(this.drawings, function(x) { return x.id; });
                     var stringified = genres_ids.join(',');
                     var This = this;
                     $.post(updateGenresOrderUrl,
@@ -86,52 +86,52 @@
                 },
 
                 up: function (i) {
-                    this.saveGenres();
-                    var genres = this.genres;
+                    this.saveDrawings();
+                    var genres = this.drawings;
                     if (i > 0) {
                         var genre = genres[i - 1];
                         genres[i - 1] = genres[i];
                         genres[i] = genre;
                     }
-                    this.reportToServer(this.showList, this.restoreGenres);
+                    this.reportToServer(this.showList, this.restoreDrawings);
                 },
 
                 down: function (i) {
-                    this.saveGenres();
-                    var genres = this.genres;
+                    this.saveDrawings();
+                    var genres = this.drawings;
                     if (i < genres.length - 1) {
                         var genre = genres[i + 1];
                         genres[i + 1] = genres[i];
                         genres[i] = genre;
                     }
-                    this.reportToServer(this.showList, this.restoreGenres);
+                    this.reportToServer(this.showList, this.restoreDrawings);
                 },
 
                 remove: function (i) {
-                    this.saveGenres();
-                    this.genres.splice(i,1);
+                    this.saveDrawings();
+                    this.drawings.splice(i,1);
                     this.reportToServer(
                         [this.showList, this.refreshFree],
-                        this.restoreGenres
+                        this.restoreDrawings
                     );
                 },
 
                 add: function (i) {
-                    this.saveGenres();
-                    this.genres.push(this.freeGenres[i]);
+                    this.saveDrawings();
+                    this.drawings.push(this.freeDrawings[i]);
                     this.reportToServer(
                         [this.showList, this.refreshFree],
-                        this.restoreGenres
+                        this.restoreDrawings
                     );
                 },
 
                 showList: function () {
                     var elem = $('#genreList');
                     elem.html('');
-                    for (var i=0; i < this.genres.length; i++) {
+                    for (var i=0; i < this.drawings.length; i++) {
                         elem.append(
                             '<li class="list-group-item" style="height: 56px; line-height: 34px;">'+
-                            '<span class="genre-name">'+ this.genres[i].name+'</span>'+
+                            '<span class="genre-name">'+ this.drawings[i].name+'</span>'+
                             '<button type="button" class="btn btn-danger pull-right" style="margin-left: 4px"onclick="Genre.remove('+i+')">'+
                             '<span class="glyphicon glyphicon-remove"></span>'+
                             '</button>'+
@@ -149,24 +149,24 @@
                 },
 
                 showFreeList: function () {
-                    var elem = $('#menu3');
+                    var elem = $('#menuGenres');
                     elem.html('');
-                    for (var i=0; i < this.freeGenres.length; i++){
+                    for (var i=0; i < this.freeDrawings.length; i++){
                         elem.append(
                             '<li role="presentation" onclick="Genre.add('+i+')"><a>'+
-                            this.freeGenres[i].name+
+                            this.freeDrawings[i].name+
                             '</a></li>'
                         );
                     }
                 },
 
                 refreshFree: function () {
-                    var t = this.allGenres.slice(0, this.allGenres.length);
+                    var t = this.allDrawings.slice(0, this.allDrawings.length);
                     var k;
-                    for (var i =0; i < this.genres.length; i++) {
+                    for (var i =0; i < this.drawings.length; i++) {
                         k = -1;
                         for (var j = 0; j < t.length; j++) {
-                            if (t[j].id == this.genres[i].id) {
+                            if (t[j].id == this.drawings[i].id) {
                                 k = j;
                                 break;
                             }
@@ -174,7 +174,7 @@
                         if (k >= 0)
                             t.splice(k, 1);
                     }
-                    this.freeGenres = t;
+                    this.freeDrawings = t;
                     this.showFreeList();
                 },
 
@@ -184,23 +184,23 @@
                         callback();
                     else
                         $.getJSON(getDrawingGenresUrl, function (data){
-                            This.genres = data;
+                            This.drawings = data;
                             This.showList();
                             callback();
                         });
                 },
 
-                getAllGenres: function() {
+                getAllDrawings: function() {
                     var This = this;
                     return $.getJSON(getGenresUrl,
                         function(data1){
-                            This.allGenres = data1;
+                            This.allDrawings = data1;
                             This.refreshFree();
                         });
                 },
 
                 init: function(){
-                    var clbk = this.getAllGenres.bind(this);
+                    var clbk = this.getAllDrawings.bind(this);
                     this.getDrawingGenres(clbk);
                 }
             };
