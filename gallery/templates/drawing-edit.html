@@ -14,12 +14,41 @@
             text-overflow: ellipsis;
             overflow: hidden;
         }
+        .row{height:100%;}
+        .row > div {height:100%;}
+        #genreList {
+            overflow: auto;
+            max-height: 35%;
+        }
+        #menu3 {
+            max-height: 300px;
+            overflow: auto;
+        }
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
     </style>
 {% endblock %}
 
 {% block script %}
+
     <script>
         $(function(){
+            const isNewEntry = {% if drawing %} false {% else %} true {% endif %};
+            const updateGenresOrderUrl =
+                {% if drawing %}
+                    "{% url 'drawing-genres-update' drawing.pk %}"
+                {% else %}
+                    "{% url 'drawing-genres-preupdate'%}"
+                {% endif %};
+            const getGenresUrl = "{% url 'genres' %}";
+            {% if drawing %}
+            const getDrawingGenresUrl = "{% url 'drawing-genres' pk=drawing.pk %}";
+            {% endif %}
             Genre = {
                 genres: [],
                 genresCopy: null,
@@ -39,7 +68,7 @@
                     var genres_ids = $.map(this.genres, function(x) { return x.id; });
                     var stringified = genres_ids.join(',');
                     var This = this;
-                    $.post("{% url 'drawing-genres-update' drawing.pk %}",
+                    $.post(updateGenresOrderUrl,
                             {'ids_order':stringified,
                              'csrfmiddlewaretoken':"{{ csrf_token }}"},
                             'json'
@@ -102,7 +131,7 @@
                     for (var i=0; i < this.genres.length; i++) {
                         elem.append(
                             '<li class="list-group-item" style="height: 56px; line-height: 34px;">'+
-                            this.genres[i].name+
+                            '<span class="genre-name">'+ this.genres[i].name+'</span>'+
                             '<button type="button" class="btn btn-danger pull-right" style="margin-left: 4px"onclick="Genre.remove('+i+')">'+
                             '<span class="glyphicon glyphicon-remove"></span>'+
                             '</button>'+
@@ -149,17 +178,30 @@
                     this.showFreeList();
                 },
 
-                init: function(){
+                getDrawingGenres: function(callback) {
                     var This = this;
-                    $.getJSON("{% url 'drawing-genres' pk=drawing.pk %}", function (data){
-                        This.genres = data;
-                        This.showList();
-                        $.getJSON("{% url 'genres' %}",
-                            function(data1){
-                                This.allGenres = data1;
-                                This.refreshFree();
-                            });
-                    })
+                    if (isNewEntry)
+                        callback();
+                    else
+                        $.getJSON(getDrawingGenresUrl, function (data){
+                            This.genres = data;
+                            This.showList();
+                            callback();
+                        });
+                },
+
+                getAllGenres: function() {
+                    var This = this;
+                    return $.getJSON(getGenresUrl,
+                        function(data1){
+                            This.allGenres = data1;
+                            This.refreshFree();
+                        });
+                },
+
+                init: function(){
+                    var clbk = this.getAllGenres.bind(this);
+                    this.getDrawingGenres(clbk);
                 }
             };
 
@@ -169,40 +211,62 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8">
-            <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" src="http://www.veseloeradio.ru/vardata/modules/lenta/images/140000/132120_1_1291477583.jpg">
-            <div class="well center-block" style="margin-top: 12px; max-width: 400px;">
-                <input type="file" id="exampleInputFile" style="display: none;">
-                <label for="exampleInputFile" class="btn btn-primary btn-lg btn-block">Upload</label>
-                <button style="margin-top: 12px" type="button" class="btn btn-warning btn-lg">
-                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                </button>
-                <button style="margin-top: 12px" type="button" class="btn btn-success btn-lg pull-right">
-                    <span class="glyphicon glyphicon-ok">OK</span>
-                </button>
+    {% load staticfiles %}
+    {% static 'gallery/img/default_img.png' as default_img %}
+    {% if drawing %}
+    {% url 'drawing-edit' pk=drawing.pk as form_url %}
+    {% else %}
+    {% url 'drawing-create' as form_url %}
+    {% endif %}
+    <form action="{{ form_url }}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-lg-8">
+                <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block"
+                     src="{% if drawing.image %}
+                              {{ drawing.image.url}}
+                          {% else %}
+                              {{ default_img }}
+                          {% endif %}">
+                <div class="well center-block" style="margin-top: 12px; max-width: 400px;">
+                    <input type="file" id="exampleInputFile" name="{{ form.image.html_name }}" style="display: none;">
+                    <label for="exampleInputFile" class="btn btn-primary btn-lg btn-block">Upload</label>
+                    <a href="{% url 'artist-detail' user.pk %}" style="margin-top: 12px" type="button" class="btn btn-warning btn-lg">
+                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    </a>
+                    <button style="margin-top: 12px" type="submit" class="btn btn-success btn-lg pull-right">
+                        <span class="glyphicon glyphicon-ok">OK</span>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="affix pull-right panel">
-                <div class="row">
-                    <div class="col-xs-6 col-md-3">
-                        <h4>Name</h4>
-                        <input type="text" class="form-control" placeholder="Name">
-                        <h4>Genres</h4>
-                        <ul class="list-group" id="genreList">
-                        </ul>
-                        <div class="dropdown">
-                            <button class="btn btn-primary pull-right" data-toggle="dropdown">
-                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            </button>
-                            <ul id="menu3" class="dropdown-menu pull-right" role="menu" aria-labelledby="drop6">
-
+            <div class="col-lg-4">
+                <div class="affix pull-right panel">
+                    <div class="row">
+                        <div class="col-xs-6 col-md-3">
+                            <label class="h4" for="{{ form.name.id_for_label }}">Name</label>
+                            <input type="text" class="form-control" placeholder="Name"
+                                   name="{{ form.name.html_name }}"
+                                   id="{{ form.name.id_for_label }}"
+                                   value="{% firstof form.name.value '' %}">
+                            <label class="h4" for="{{ form.description.id_for_label }}">Description</label>
+                            <textarea type="text" class="form-control" placeholder="Name"
+                                   id="{{ form.description.id_for_label }}"
+                                   name="{{ form.description.html_name }}">{% firstof form.description.value '' %}</textarea>
+                            <h4>Genres</h4>
+                            <ul class="list-group" id="genreList">
                             </ul>
+                            <div class="dropdown">
+                                <button class="btn btn-primary pull-right" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </button>
+                                <ul id="menu3" class="dropdown-menu pull-right" role="menu" aria-labelledby="drop6">
+
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 {% endblock %}

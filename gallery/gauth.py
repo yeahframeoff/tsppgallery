@@ -300,6 +300,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     full_name = property(get_full_name)
 
+    @property
+    def is_artist(self):
+        return self.role == Role.ARTIST
+
+    @property
+    def is_organizer(self):
+        return self.role == Role.ORGANIZER
 
 class UserCreationForm(forms.UserCreationForm):
     class Meta(forms.UserCreationForm.Meta):

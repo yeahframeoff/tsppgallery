@@ -19,6 +19,7 @@
 
 {% block title %} User {{ artist.full_name }} {% endblock %}
 {% block content %}
+    {% load templatetags %}
     <div class="row">
         <div class="col-lg-8">
             <div class="list-group">
@@ -33,17 +34,20 @@
                                 </a>
                             </div>
                             <div class="media-body">
-                                <h4 class="media-heading">{{ drawing.name }}</h4>
-                                <h5>Теги:
-                                    {% for genre in drawing.genres.all %}
+                                <h4 class="media-heading"><a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a></h4>
+                                <h5>Genres:
+                                    {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
                                         <span class="label label-default">{{ genre }}</span>
                                     {% endfor %}
                                 </h5>
                             </div>
                             <div class="imageBtn pull-right">
-                                <button type="button" class="btn btn-warning">
+                                {% if artist.pk == user.pk %}
+                                <a type="button" class="btn btn-warning"
+                                        href="{% url 'drawing-edit' drawing.pk %}">
                                     <span class="glyphicon glyphicon-pencil"></span>
-                                </button>
+                                </a>
+                                {% endif %}
                                 <button type="button" class="btn btn-danger">
                                     <span class="glyphicon glyphicon-remove"></span>
                                 </button>
@@ -60,7 +64,7 @@
                         <a href="#" class="thumbnail">
                             <img src="{{ artist.photo.url }}" alt="{{ artist.full_name }}">
                         </a>
-                        <h3>{{ artist.full_name }}</h3>
+                        <h3>{{ artist.full_name }} @{{ artist.username }}</h3>
                         <h4>{{ artist.bio }}</h4>
                     </div>
                 </div>

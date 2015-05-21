@@ -34,6 +34,13 @@ class Artist(User):
     def get_absolute_url(self):
         return reverse('artist-detail',args=[self.pk])
 
+    def owns(self, drawing):
+        if not isinstance(drawing, Drawing):
+            return Drawing.objects.filter(pk=drawing, artist=self.id).exists()
+        else:
+            return drawing.artist_id == self.id or \
+                   drawing.artist_id == self.id.id
+
 
 class OrganizerManager(UserManager):
     def get_queryset(self):
@@ -50,6 +57,14 @@ class Organizer(User):
         verbose_name = _('organizer')
         verbose_name_plural = _('organizers')
 
+    def owns(self, exhibition):
+        if not isinstance(exhibition, Exhibition):
+            return Exhibition.objects.filter(pk=exhibition, organizer=self).exists()
+        else:
+            return exhibition.organizer_id == self.id or \
+                   exhibition.organizer_id == self.id.id
+
+
 class Genre(models.Model):
     name = models.CharField(max_length=32)
     __str__ = lambda self: self.name
@@ -61,8 +76,8 @@ class Genre(models.Model):
 
 class Drawing(models.Model):
     image = models.ImageField(upload_to='images/%Y/%m/')
-    name = models.CharField(max_length=32)
-    description = models.TextField()
+    name = models.CharField(max_length=32, default='Drawing', blank=True)
+    description = models.TextField(default='', blank=True)
     artist = models.ForeignKey(Artist, related_name='drawings', related_query_name='drawing')
     genres = models.ManyToManyField(
         Genre,
@@ -104,7 +119,7 @@ class Exhibition(models.Model):
     description = models.TextField('описание выставки')
 
     def get_absolute_url(self):
-        return reverse('exhibition-view',args=[self.pk])
+        return reverse('exhibition-detail',args=[self.pk])
 
     def __str__(self):
         return '%d %s' % (self.pk, self.name)

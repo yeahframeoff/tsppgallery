@@ -1,11 +1,14 @@
+from django import forms
 from django.shortcuts import render
 from .gauth import UserCreationForm
 from django.http import \
     HttpResponseRedirect, HttpResponse, Http404,\
-    HttpResponseBadRequest, JsonResponse
+    HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
-from .models import Artist, Organizer, Drawing, Exhibition, DrawingGenre, Genre, ExhibitionGenre
+from .models import \
+    Artist, Organizer, Drawing, Exhibition, \
+    DrawingGenre, Genre, ExhibitionGenre
 
 from django.views import generic as genericviews
 import json
@@ -20,7 +23,10 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+            new_user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1']
+            )
             login(request, new_user)
             return HttpResponseRedirect(reverse('mainpage'))
     else:
@@ -29,9 +35,10 @@ def register(request):
 
 
 class ArtistDetailView(genericviews.DetailView):
-    model = Artist
     template_name = 'artist.html'
     context_object_name = 'artist'
+    queryset = Artist.objects.all()\
+        .prefetch_related('drawings__genres')
 
 
 class OrganizerDetailView(genericviews.DetailView):
@@ -42,22 +49,59 @@ class OrganizerDetailView(genericviews.DetailView):
 
 class DrawingDetailView(genericviews.DetailView):
     model = Drawing
-    template_name = 'image-view.html'
+    template_name = 'drawing-view.html'
     context_object_name = 'drawing'
+
+
+class DrawingForm(forms.ModelForm):
+    class Meta:
+        model = Drawing
+        fields = ('name', 'image', 'description')
+
+    def save(self, commit=True):
+        instance = super().save()
+        ids_list = self.ids_list.split(',')
+        length = len(ids_list)
+        ids_list = (int(id) for id in ids_list)
+        ids_list = (
+            (num, id) for num, id in
+            zip(range(1, length + 1), ids_list)
+        )
+        bulk = []
+        for num, id in ids_list:
+            bulk.append(DrawingGenre(genre_id=id, priority=num))
+        Drawing.objects.get(pk=instance.pk).drawinggenre_set = bulk
+        return instance
 
 
 class DrawingEditView(genericviews.UpdateView):
     model = Drawing
-    template_name = 'image-edit.html'
+    template_name = 'drawing-edit.html'
     context_object_name = 'drawing'
     fields = ('image', 'name', 'description')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_artist:
+            return HttpResponseForbidden('Only artists can edit drawings')
+        elif int(kwargs.get('pk', 0)) <= 0:
+            return HttpResponseBadRequest('Bad drawing id')
+        elif not Artist(request.user).owns(kwargs.get('pk', 0)):
+            return HttpResponseForbidden('Artists can edit their drawings only')
+        else:
+            return super().dispatch(request, args, kwargs)
 
-class DrawingCreateView(genericviews.CreateView):
-    model = Drawing
-    template_name = 'image-edit.html'
-    context_object_name = 'drawing'
-    fields = ('image', 'name', 'description')
+
+def create_drawing_view(request):
+    if request.method == 'POST':
+        form = DrawingForm(request.POST, request.FILES)
+        form.instance.artist = Artist.objects.get(pk=request.user.pk)
+        if form.is_valid():
+            form.ids_list = request.session.get('drawing_genres_ids_list', '')
+            instance = form.save()
+            return HttpResponseRedirect(instance.get_absolute_url())
+    else:
+        form = DrawingForm()
+    return render(request, 'drawing-edit.html', {'form': form})
 
 
 class ExhibitionDetailView(genericviews.DetailView):
@@ -83,7 +127,8 @@ class ViewAjaxOnlyMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if not request.is_ajax():
             raise Http404("This is an ajax view, friend.")
-        return super(ViewAjaxOnlyMixin, self).dispatch(request, *args, **kwargs)
+        return super(ViewAjaxOnlyMixin, self)\
+            .dispatch(request, *args, **kwargs)
 
 
 class ViewReturnJsonMixin(object):
@@ -123,7 +168,8 @@ class DrawingGenresListView(ViewAjaxGetMixin, genericviews.ListView):
 
     def get_queryset(self, **kwargs):
         pk = kwargs['pk']
-        return Drawing.objects.get(pk=pk).genres.order_by('drawinggenre__priority').all();
+        return Drawing.objects.get(pk=pk).genres\
+            .order_by('drawinggenre__priority').all();
 
 
 class ExhibitionGenresListView(ViewAjaxGetMixin, genericviews.ListView):
@@ -132,7 +178,8 @@ class ExhibitionGenresListView(ViewAjaxGetMixin, genericviews.ListView):
 
     def get_queryset(self, **kwargs):
         pk = kwargs['pk']
-        return Exhibition.objects.get(pk=pk).genres.order_by('exhibitiongenre__priority').all();
+        return Exhibition.objects.get(pk=pk).genres\
+            .order_by('exhibitiongenre__priority').all();
 
 
 def update_drawing_genres_order(request, drawing_id):
@@ -151,6 +198,12 @@ def update_drawing_genres_order(request, drawing_id):
     for num, id in ids_list:
         bulk.append(DrawingGenre(genre_id=id, priority=num))
     Drawing.objects.get(pk=drawing_id).drawinggenre_set = bulk
+    return JsonResponse({'success': True})
+
+
+def preupdate_drawing_genres_order(request):
+    ids_list = request.POST.get('ids_order', None)
+    request.session['drawing_genres_ids_list'] = ids_list
     return JsonResponse({'success': True})
 
 

@@ -15,10 +15,20 @@
     <div class="row">
         <div class="col-lg-8">
             <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" src="{{ drawing.image.url }}">
-            <h3>{{ drawing.name }}</h3>
+            <div class="row">
+                <div class="col-sm-10">
+                    <h3>{{ drawing.name }}</h3>
+                </div>
+                <div class="col-sm-offset-10">
+                    {% if user|owns_drawing:drawing %}
+                    <a href="{% url 'drawing-edit' drawing.pk %}" class="btn btn-lg btn-default"><span class="glyphicon glyphicon-pencil"></span>Edit</a>
+                    {% endif %}
+                </div>
+            </div>
             <p>
                 {{ drawing.description }}
             </p>
+
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">
