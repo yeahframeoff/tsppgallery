@@ -99,7 +99,7 @@ class DrawingEditView(genericviews.UpdateView):
             return HttpResponseForbidden('Only artists can edit drawings')
         elif int(kwargs.get('pk', 0)) <= 0:
             return HttpResponseBadRequest('Bad drawing id')
-        elif not Artist(request.user).owns(int(kwargs.get('pk', 0))):
+        elif not request.user.owns(int(kwargs.get('pk', 0))):
             return HttpResponseForbidden('Artists can edit their drawings only')
         else:
             return super().dispatch(request, args, kwargs)
@@ -156,7 +156,7 @@ class ExhibitionEditView(genericviews.UpdateView):
             return HttpResponseForbidden('Only organizers can edit exhibitions')
         elif int(kwargs.get('pk', 0)) <= 0:
             return HttpResponseBadRequest('Bad exhibition id')
-        elif not Organizer(request.user).owns(int(kwargs.get('pk', 0))):
+        elif not request.user.owns(int(kwargs.get('pk', 0))):
             return HttpResponseForbidden('Organizers can edit their drawings only')
         else:
             return super().dispatch(request, args, kwargs)

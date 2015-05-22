@@ -51,6 +51,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'gallery.middleware.UserProxySubstituteMiddleware'
 )
 
 ROOT_URLCONF = 'tsppgallery.urls'
