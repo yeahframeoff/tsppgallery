@@ -24,7 +24,7 @@
         <div class="col-lg-8">
             <div class="list-group">
                 {% for drawing in artist.drawings.all %}
-                    {% include 'drawing-tile.html' with drawing=drawing %}
+                    {% include 'drawing/tile.html' with drawing=drawing %}
                 {% endfor %}
             </div>
         </div>

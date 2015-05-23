@@ -55,7 +55,7 @@ class OrganizerDetailView(genericviews.DetailView):
 
 class DrawingDetailView(genericviews.DetailView):
     model = Drawing
-    template_name = 'drawing-view.html'
+    template_name = 'drawing/view.html'
     context_object_name = 'drawing'
 
 
@@ -90,12 +90,12 @@ def create_drawing_view(request):
             return HttpResponseRedirect(instance.get_absolute_url())
     else:
         form = DrawingForm()
-    return render(request, 'drawing-edit.html', {'form': form})
+    return render(request, 'drawing/edit.html', {'form': form})
 
 
 class DrawingEditView(genericviews.UpdateView):
     model = Drawing
-    template_name = 'drawing-edit.html'
+    template_name = 'drawing/edit.html'
     context_object_name = 'drawing'
     fields = ('image', 'name', 'description')
 
@@ -135,7 +135,7 @@ def delete_exhibition(request, pk):
 
 class ExhibitionDetailView(genericviews.DetailView):
     model = Exhibition
-    template_name = 'exhibition-view.html'
+    template_name = 'exhibition/view.html'
     context_object_name = 'xzibit'
 
 
@@ -170,12 +170,12 @@ def create_exhibition_view(request):
             return HttpResponseRedirect(instance.get_absolute_url())
     else:
         form = ExhibitionForm()
-    return render(request, 'exhibition-edit.html', {'form': form})
+    return render(request, 'exhibition/edit.html', {'form': form})
 
 
 class ExhibitionEditView(genericviews.UpdateView):
     model = Exhibition
-    template_name = 'exhibition-edit.html'
+    template_name = 'exhibition/edit.html'
     context_object_name = 'xzibit'
     fields = ('name', 'description')
 

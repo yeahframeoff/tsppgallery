@@ -24,10 +24,10 @@
         <div class="col-lg-8">
             <div class="list-group">
                 {% for drawing in xzibit.drawings.all %}
-                    {% include 'drawing-tile.html' %}
+                    {% include 'drawing/tile.html' %}
                 {% endfor %}
             </div>
-            {% include 'exhibition-edit-btn-span.html' %}
+            {% include 'exhibition/edit-btn-span.html' %}
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">
