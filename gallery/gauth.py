@@ -305,9 +305,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_artist(self):
         return self.role == Role.ARTIST
 
+    @staticmethod
+    def check_artist(user):
+        return user.is_authenticated() and user.is_artist
+
     @property
     def is_organizer(self):
         return self.role == Role.ORGANIZER
+
+    @staticmethod
+    def check_organizer(user):
+        return user.is_authenticated() and user.is_organizer
 
     def owns_drawing(self, drawing):
         return False

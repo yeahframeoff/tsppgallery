@@ -1,12 +1,13 @@
 from django import forms
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 from .gauth import UserCreationForm
+from .models import User
 from django.http import \
-    HttpResponseRedirect, HttpResponse, Http404,\
+    HttpResponseRedirect, HttpResponse, \
     HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
 from .models import \
     Artist, Organizer, Drawing, Exhibition, \
@@ -23,8 +24,9 @@ def main(request):
     else:
         return HttpResponseRedirect(reverse('login'))
 
-
 def register(request):
+    if not request.user.is_anonymous():
+        logout(request)
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -39,21 +41,27 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
+class LoginRequiredMixin:
+    @classmethod
+    def as_view(cls, *args, **kwargs):
+        view = super(LoginRequiredMixin, cls).as_view(*args, **kwargs)
+        return login_required(view)
 
-class ArtistDetailView(genericviews.DetailView):
+
+class ArtistDetailView(LoginRequiredMixin, genericviews.DetailView):
     template_name = 'artist.html'
     context_object_name = 'artist'
     queryset = Artist.objects.all()\
         .prefetch_related('drawings__genres')
 
 
-class OrganizerDetailView(genericviews.DetailView):
+class OrganizerDetailView(LoginRequiredMixin, genericviews.DetailView):
     model = Organizer
     template_name = 'organizer.html'
     context_object_name = 'org'
 
 
-class DrawingDetailView(genericviews.DetailView):
+class DrawingDetailView(LoginRequiredMixin, genericviews.DetailView):
     model = Drawing
     template_name = 'drawing/view.html'
     context_object_name = 'drawing'
@@ -80,7 +88,8 @@ class DrawingForm(forms.ModelForm):
         return instance
 
 
-def create_drawing_view(request):
+@user_passes_test(User.check_artist)
+def create_drawing(request):
     if request.method == 'POST':
         form = DrawingForm(request.POST, request.FILES)
         form.instance.artist = Artist.objects.get(pk=request.user.pk)
@@ -93,7 +102,8 @@ def create_drawing_view(request):
     return render(request, 'drawing/edit.html', {'form': form})
 
 
-class DrawingEditView(genericviews.UpdateView):
+
+class DrawingEditView(LoginRequiredMixin, genericviews.UpdateView):
     model = Drawing
     template_name = 'drawing/edit.html'
     context_object_name = 'drawing'
@@ -106,15 +116,20 @@ class DrawingEditView(genericviews.UpdateView):
         if drawing_id <= 0:
             return HttpResponseBadRequest('Bad drawing id')
         elif not request.user.owns_drawing(drawing_id):
-            return HttpResponseForbidden('Artists can edit their drawings only')
+            return HttpResponseForbidden('Artists can edit only their own drawings')
         else:
             return super().dispatch(request, args, kwargs)
 
 
+@user_passes_test(User.check_artist)
 @require_POST
 def delete_drawing(request, pk):
     try:
-        Drawing.objects.get(pk=pk).delete()
+        drawing = Drawing.objects.get(pk=pk)
+        if not request.user.owns_drawing(drawing):
+            return HttpResponseForbidden('Artists can delete '
+                                         'only their own drawings')
+        drawing.delete()
     except Drawing.DoesNotExist:
         pass
     redirect_url = request.GET.get('HTTP_REFERER') or \
@@ -122,10 +137,15 @@ def delete_drawing(request, pk):
     return HttpResponseRedirect(redirect_url)
 
 
+@user_passes_test(User.check_organizer)
 @require_POST
 def delete_exhibition(request, pk):
     try:
-        Exhibition.objects.get(pk=pk).delete()
+        xzibit = Exhibition.objects.get(pk=pk)
+        if not request.user.owns_exhibition(xzibit):
+            return HttpResponseForbidden('Organizers can delete '
+                                         'only their own exhibitions')
+        xzibit.delete()
     except Drawing.DoesNotExist:
         pass
     redirect_url = request.GET.get('HTTP_REFERER') or \
@@ -133,7 +153,7 @@ def delete_exhibition(request, pk):
     return HttpResponseRedirect(redirect_url)
 
 
-class ExhibitionDetailView(genericviews.DetailView):
+class ExhibitionDetailView(LoginRequiredMixin, genericviews.DetailView):
     model = Exhibition
     template_name = 'exhibition/view.html'
     context_object_name = 'xzibit'
@@ -160,6 +180,7 @@ class ExhibitionForm(forms.ModelForm):
         return instance
 
 
+@user_passes_test(User.check_organizer)
 def create_exhibition_view(request):
     if request.method == 'POST':
         form = ExhibitionForm(request.POST)
@@ -173,7 +194,7 @@ def create_exhibition_view(request):
     return render(request, 'exhibition/edit.html', {'form': form})
 
 
-class ExhibitionEditView(genericviews.UpdateView):
+class ExhibitionEditView(LoginRequiredMixin, genericviews.UpdateView):
     model = Exhibition
     template_name = 'exhibition/edit.html'
     context_object_name = 'xzibit'
@@ -181,12 +202,14 @@ class ExhibitionEditView(genericviews.UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_organizer:
-            return HttpResponseForbidden('Only organizers can edit exhibitions')
+            return HttpResponseForbidden('Only organizers can '
+                                         'edit exhibitions')
         exhibition_id = int(kwargs.get('pk', 0))
         if exhibition_id <= 0:
             return HttpResponseBadRequest('Bad exhibition id')
         elif not request.user.owns_exhibition(exhibition_id):
-            return HttpResponseForbidden('Organizers can edit their drawings only')
+            return HttpResponseForbidden('Organizers can edit '
+                                         'only their own exhibitions')
         else:
             return super().dispatch(request, args, kwargs)
 
@@ -194,7 +217,7 @@ class ExhibitionEditView(genericviews.UpdateView):
 class ViewAjaxOnlyMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if not request.is_ajax():
-            raise Http404("This is an ajax view, friend.")
+            return HttpResponseForbidden("This is an ajax view, friend.")
         return super(ViewAjaxOnlyMixin, self)\
             .dispatch(request, *args, **kwargs)
 
@@ -214,9 +237,8 @@ class ViewReturnJsonMixin(object):
         )
 
 
-class ViewAjaxGetMixin(ViewAjaxOnlyMixin, ViewReturnJsonMixin):
+class ViewAjaxGetMixin(LoginRequiredMixin, ViewAjaxOnlyMixin, ViewReturnJsonMixin):
     pass
-
 
 class GenresView(ViewAjaxGetMixin, genericviews.ListView):
     fields_to_serialize = ('id', 'name')
@@ -282,7 +304,11 @@ class ExhibitionDrawingsListView(ViewAjaxGetMixin, genericviews.ListView):
             .drawings.all().prefetch_related('genres');
 
 
+@user_passes_test(User.check_artist)
 def update_drawing_genres_order(request, drawing_id):
+    if not request.user.owns_drawing(drawing_id):
+        return HttpResponseForbidden('Artists can edit '
+                                     'only their own drawings')
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
@@ -300,7 +326,12 @@ def update_drawing_genres_order(request, drawing_id):
     Drawing.objects.get(pk=drawing_id).drawinggenre_set = bulk
     return JsonResponse({'success': True})
 
+
+@user_passes_test(User.check_organizer)
 def update_exhibition_genres_order(request, exhibition_id):
+    if not request.user.owns_exhibition(exhibition_id):
+        return HttpResponseForbidden('Organizers can edit '
+                                     'only their own exhibitions')
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
@@ -318,17 +349,26 @@ def update_exhibition_genres_order(request, exhibition_id):
     Exhibition.objects.get(pk=exhibition_id).exhibitiongenre_set = bulk
     return JsonResponse({'success': True})
 
+
+@user_passes_test(User.check_artist)
 def preupdate_drawing_genres_order(request):
     ids_list = request.POST.get('ids_order', None)
     request.session['drawing_genres_ids_list'] = ids_list
     return JsonResponse({'success': True})
 
+
+@user_passes_test(User.check_organizer)
 def preupdate_exhibition_genres_order(request):
     ids_list = request.POST.get('ids_order', None)
     request.session['exhibition_genres_ids_list'] = ids_list
     return JsonResponse({'success': True})
 
+
+@user_passes_test(User.check_organizer)
 def update_exhibition_drawings_list(request, exhibition_id):
+    if not request.user.owns_exhibition(exhibition_id):
+        return HttpResponseForbidden('Organizers can edit '
+                                     'only their own exhibitions')
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
@@ -336,6 +376,8 @@ def update_exhibition_drawings_list(request, exhibition_id):
     Exhibition.objects.get(pk=exhibition_id).drawings = ids_list
     return JsonResponse({'success': True})
 
+
+@user_passes_test(User.check_organizer)
 def preupdate_exhibition_drawings_list(request, exhibition_id):
     ids_list = request.POST.get('ids_order', None)
     request.session['exhibition_drawings_ids_list'] = ids_list
