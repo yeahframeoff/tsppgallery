@@ -20,13 +20,9 @@ def as_org(user):
     return Organizer(user)
 
 @register.filter
-def owns(user, object):
-    return user.owns(object)
-
-@register.filter
 def owns_drawing(user, drawing):
-    return user.is_artist and Artist(user).owns(drawing)
+    return user.owns_drawing(drawing)
 
 @register.filter
 def owns_xzibit(user, exhibition):
-    return user.is_organizer and Organizer(user).owns(exhibition)
+    return user.owns_exhibition(exhibition)

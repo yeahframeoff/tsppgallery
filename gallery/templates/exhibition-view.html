@@ -24,18 +24,10 @@
         <div class="col-lg-8">
             <div class="list-group">
                 {% for drawing in xzibit.drawings.all %}
-                    {% include 'drawing-tile.html' with drawing=drawing %}
+                    {% include 'drawing-tile.html' %}
                 {% endfor %}
             </div>
-            {% if xzibit.organizer.pk == user.pk %}
-                <a type="button" class="btn btn-warning"
-                        href="{% url 'exhibition-edit' xzibit.pk %}">
-                    <span class="glyphicon glyphicon-pencil"></span>
-                </a>
-                <button type="button" class="btn btn-danger">
-                    <span class="glyphicon glyphicon-remove"></span>
-                </button>
-            {% endif %}
+            {% include 'exhibition-edit-btn-span.html' %}
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">

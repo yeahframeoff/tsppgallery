@@ -4,7 +4,7 @@ from django.conf import settings
 
 urlpatterns = (
     url(r'^', include('gallery.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls), name='admin'),
 )
 if settings.DEBUG:
     urlpatterns += (

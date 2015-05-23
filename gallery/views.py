@@ -1,6 +1,7 @@
 from django import forms
-from django.conf import settings
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
 from .gauth import UserCreationForm
 from django.http import \
     HttpResponseRedirect, HttpResponse, Http404,\
@@ -16,7 +17,11 @@ import json
 
 
 def main(request):
-    return render(request, 'mainpage.html')
+    user = request.user
+    if user.is_authenticated():
+        return HttpResponseRedirect(user.get_absolute_url())
+    else:
+        return HttpResponseRedirect(reverse('login'))
 
 
 def register(request):
@@ -97,12 +102,35 @@ class DrawingEditView(genericviews.UpdateView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_artist:
             return HttpResponseForbidden('Only artists can edit drawings')
-        elif int(kwargs.get('pk', 0)) <= 0:
+        drawing_id = int(kwargs.get('pk', 0))
+        if drawing_id <= 0:
             return HttpResponseBadRequest('Bad drawing id')
-        elif not request.user.owns(int(kwargs.get('pk', 0))):
+        elif not request.user.owns_drawing(drawing_id):
             return HttpResponseForbidden('Artists can edit their drawings only')
         else:
             return super().dispatch(request, args, kwargs)
+
+
+@require_POST
+def delete_drawing(request, pk):
+    try:
+        Drawing.objects.get(pk=pk).delete()
+    except Drawing.DoesNotExist:
+        pass
+    redirect_url = request.GET.get('HTTP_REFERER') or \
+                   reverse('artist-detail', args=[request.user.pk])
+    return HttpResponseRedirect(redirect_url)
+
+
+@require_POST
+def delete_exhibition(request, pk):
+    try:
+        Exhibition.objects.get(pk=pk).delete()
+    except Drawing.DoesNotExist:
+        pass
+    redirect_url = request.GET.get('HTTP_REFERER') or \
+                   reverse('organizer-detail', args=[request.user.pk])
+    return HttpResponseRedirect(redirect_url)
 
 
 class ExhibitionDetailView(genericviews.DetailView):
@@ -154,9 +182,10 @@ class ExhibitionEditView(genericviews.UpdateView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_organizer:
             return HttpResponseForbidden('Only organizers can edit exhibitions')
-        elif int(kwargs.get('pk', 0)) <= 0:
+        exhibition_id = int(kwargs.get('pk', 0))
+        if exhibition_id <= 0:
             return HttpResponseBadRequest('Bad exhibition id')
-        elif not request.user.owns(int(kwargs.get('pk', 0))):
+        elif not request.user.owns_exhibition(exhibition_id):
             return HttpResponseForbidden('Organizers can edit their drawings only')
         else:
             return super().dispatch(request, args, kwargs)

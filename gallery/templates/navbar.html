@@ -1,5 +1,16 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
+        <div class="nav navbar-nav navbar-left">
+            {% if user.is_artist %}
+            <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
+                <span class="glyphicon glyphicon-pencil"></span> Add drawing
+            </a>
+            {% elif user.is_organizer %}
+            <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
+                <span class="glyphicon glyphicon-th"></span> Add Exhibition
+            </a>
+            {% endif %}
+        </div>
         <div class="nav navbar-nav navbar-right">
             <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>@{{ user.username }}</em></a></p>
             <li><a href="{% url 'logout' %}">Log Out</a></li>

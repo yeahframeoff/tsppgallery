@@ -17,6 +17,9 @@ class Admin(User):
     class Meta(User.Meta):
         proxy = True
 
+    def get_absolute_url(self):
+        return reverse('admin:index')
+
 
 class ArtistManager(UserManager):
     def get_queryset(self):
@@ -34,10 +37,10 @@ class Artist(User):
     def get_absolute_url(self):
         return reverse('artist-detail',args=[self.pk])
 
-    def owns(self, drawing):
+    def owns_drawing(self, drawing):
         if not isinstance(drawing, Drawing):
             return Drawing.objects.filter(pk=drawing, artist=self.id).exists()
-        else:
+        else :
             return drawing.artist_id == self.id or \
                    drawing.artist_id == self.id.id
 
@@ -57,7 +60,10 @@ class Organizer(User):
         verbose_name = _('organizer')
         verbose_name_plural = _('organizers')
 
-    def owns(self, exhibition):
+    def get_absolute_url(self):
+        return reverse('organizer-detail', args=[self.pk])
+
+    def owns_exhibition(self, exhibition):
         if not isinstance(exhibition, Exhibition):
             return Exhibition.objects.filter(pk=exhibition, organizer=self.id).exists()
         else:

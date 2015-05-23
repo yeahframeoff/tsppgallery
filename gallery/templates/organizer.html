@@ -13,11 +13,11 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-8">
-            <ul class="list-group">
+            <div class="list-group">
                 {% for xzibit in org.exhibitions.all %}
-                    <li class="list-group-item h4">
+                    <div class="list-group-item h4">
                         <a href="{{ xzibit.get_absolute_url }}">{{ xzibit.name }}</a>
-                        <div class="row">
+                        <div class="media">
                             {% for drawing in xzibit.drawings.all %}
                                 <div class="col-xs-3">
                                     <a href="{{ drawing.get_absolute_url }}" class="thumbnail">
@@ -27,17 +27,11 @@
                                     </a>
                                 </div>
                             {% endfor %}
+                        {% include 'exhibition-edit-btn-span.html' with xzibit=xzibit user=user %}
                         </div>
-                    </li>
-                {% endfor %}<div class="dropdown">
-                                <button class="btn btn-primary pull-right" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                </button>
-                                <ul id="menu3" class="dropdown-menu pull-right" role="menu" aria-labelledby="drop6">
-
-                                </ul>
-                            </div>
-            </ul>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">

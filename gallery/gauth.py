@@ -309,6 +309,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_organizer(self):
         return self.role == Role.ORGANIZER
 
+    def owns_drawing(self, drawing):
+        return False
+
+    def owns_exhibition(self, exhibition):
+        return False
+
+
 class UserCreationForm(forms.UserCreationForm):
     class Meta(forms.UserCreationForm.Meta):
         model = User

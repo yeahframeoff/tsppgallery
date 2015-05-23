@@ -16,16 +16,6 @@
                 {% endfor %}
             </h5>
         </div>
-        <div class="imageBtn pull-right">
-            {% if drawing.artist.pk == user.pk %}
-            <a type="button" class="btn btn-warning"
-                    href="{% url 'drawing-edit' drawing.pk %}">
-                <span class="glyphicon glyphicon-pencil"></span>
-            </a>
-            <button type="button" class="btn btn-danger">
-                <span class="glyphicon glyphicon-remove"></span>
-            </button>
-            {% endif %}
-        </div>
+        {% include 'drawing-edit-btn-span.html' with drawing=drawing user=user %}
     </div>
 </div>
