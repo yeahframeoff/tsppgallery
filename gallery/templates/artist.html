@@ -22,11 +22,18 @@
     {% load templatetags %}
     <div class="row">
         <div class="col-lg-8">
-            <div class="list-group">
+            {% if not artist.drawings.all %}
+                <h4>There are no drawings yet. <em>Create the first one!</em></h4>
+                <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
+                    <span class="glyphicon glyphicon-pencil"></span> Add drawing
+                </a>
+            {% else %}
+                <div class="list-group">
                 {% for drawing in artist.drawings.all %}
-                    {% include 'drawing/tile.html' with drawing=drawing %}
+                    {% include 'drawing/tile.html' %}
                 {% endfor %}
-            </div>
+                </div>
+            {% endif %}
         </div>
         <div class="col-lg-4">
             <div class="affix pull-right panel">

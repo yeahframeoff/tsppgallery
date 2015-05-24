@@ -1,4 +1,5 @@
-from django.contrib.auth import forms
+from django import forms
+from django.contrib.auth import forms as authforms
 from django.core import validators
 from django.db import models
 from django.contrib.auth.models import \
@@ -16,11 +17,12 @@ class Role(models.CharField):
     ARTIST = 'AR'
     ORGANIZER = 'OR'
 
-    ROLES_LIST = (
-        (ADMIN, 'Admin'),
+    ROLES_FORM_LIST = (
         (ARTIST, 'Artist'),
         (ORGANIZER, 'Organizer')
     )
+
+    ROLES_LIST = ROLES_FORM_LIST + ((ADMIN, 'Admin'),)
 
     def __init__(self, *args, **kwargs):
         upd = {
@@ -242,7 +244,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_('Required. 4-20 characters. Small letters, digits,'
                     'dot and underscore characters.'),
         validators=[
-            validators.RegexValidator(r'^[A-Za-z0-9._]{4,20}$',
+            validators.RegexValidator(r'^[a-z0-9._]{4,20}$',
                                       _('Enter a valid username. '
                                         'This value may contain only small letters, digits, '
                                         'dot and underscore characters.'),
@@ -324,12 +326,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         return False
 
 
-class UserCreationForm(forms.UserCreationForm):
-    class Meta(forms.UserCreationForm.Meta):
+class UserCreationForm(authforms.UserCreationForm):
+    class Meta(authforms.UserCreationForm.Meta):
         model = User
         fields = ('username', 'role')
 
+    role = forms.TypedChoiceField(choices=Role.ROLES_FORM_LIST  )
 
-class UserChangeForm(forms.UserChangeForm):
-    class Meta(forms.UserChangeForm.Meta):
+
+class UserChangeForm(authforms.UserChangeForm):
+    class Meta(authforms.UserChangeForm.Meta):
         model = User
