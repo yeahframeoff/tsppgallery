@@ -99,6 +99,9 @@ class Drawing(models.Model):
     def get_absolute_url(self):
         return reverse('drawing-detail',args=[self.pk])
 
+    def get_related_exhibitions_page_url(self):
+        return '%s?drawing=%d' % (reverse('exhibitions-index'), self.pk)
+
     class Meta:
         verbose_name = _('drawing')
         verbose_name_plural = _('drawings')

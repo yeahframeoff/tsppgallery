@@ -15,21 +15,7 @@
         <div class="col-lg-8">
             <div class="list-group">
                 {% for xzibit in org.exhibitions.all %}
-                    <div class="list-group-item h4">
-                        <a href="{{ xzibit.get_absolute_url }}">{{ xzibit.name }}</a>
-                        <div class="media">
-                            {% for drawing in xzibit.drawings.all %}
-                                <div class="col-xs-3">
-                                    <a href="{{ drawing.get_absolute_url }}" class="thumbnail">
-                                        <img data-src="holder.js/100%x180" alt="100%x180"
-                                             src="{{ drawing.image.url }}" data-holder-rendered="true"
-                                             style="height: 115px; width: 100%; display: block;">
-                                    </a>
-                                </div>
-                            {% endfor %}
-                        {% include 'exhibition/edit-btn-span.html' with xzibit=xzibit user=user %}
-                        </div>
-                    </div>
+                    {% include 'exhibition/tile.html' %}
                 {% endfor %}
             </div>
         </div>

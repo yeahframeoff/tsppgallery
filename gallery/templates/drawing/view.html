@@ -17,11 +17,15 @@
             <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" src="{{ drawing.image.url }}">
             <div class="row">
                 <div class="col-sm-10">
-                    <h3>{{ drawing.name }}</h3>
+                    <h3>{{ drawing.name }}
+                        {% if drawing.exhibition__count > 0 %}
+                            <a href="{{ drawing.get_related_exhibitions_page_url }}" class="badge">{{ drawing.exhibition__count }} exhibitions</a>
+                        {% endif %}
+                    </h3>
                 </div>
                 <div class="imageBtn pull-right">
-                {% include 'drawing/edit-btn-span.html' %}
-        </div>
+                    {% include 'drawing/edit-btn-span.html' %}
+                </div>
             </div>
             <p>
                 {{ drawing.description }}

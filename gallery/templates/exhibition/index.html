@@ -1,0 +1,12 @@
+{% extends 'base-cf.html' %}
+
+{% block title %} Exhibitions {% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="list-group">
+            {% for xzibit in exhibitions %}
+                {% include 'exhibition/tile_with_org.html' %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

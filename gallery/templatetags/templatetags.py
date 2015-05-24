@@ -1,3 +1,4 @@
+import urllib
 from django import template
 from ..models import Artist, Organizer
 register = template.Library()

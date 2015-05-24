@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q, Count
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from .gauth import UserCreationForm
@@ -62,9 +63,10 @@ class OrganizerDetailView(LoginRequiredMixin, genericviews.DetailView):
 
 
 class DrawingDetailView(LoginRequiredMixin, genericviews.DetailView):
-    model = Drawing
+    # model = Drawing
     template_name = 'drawing/view.html'
     context_object_name = 'drawing'
+    queryset = Drawing.objects.all().annotate(Count('exhibition'))
 
 
 class DrawingForm(forms.ModelForm):
@@ -151,6 +153,21 @@ def delete_exhibition(request, pk):
     redirect_url = request.GET.get('HTTP_REFERER') or \
                    reverse('organizer-detail', args=[request.user.pk])
     return HttpResponseRedirect(redirect_url)
+
+
+class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
+    template_name = 'exhibition/index.html'
+    context_object_name = 'exhibitions'
+
+    def get_queryset(self):
+        req = self.request
+        qs = Exhibition.objects.all()
+        drawing_id = int(req.GET.get('drawing', 0))
+        if drawing_id:
+            qs = qs.filter(drawings=drawing_id)
+        condition = Q(approved=True) | Q(approved=False, organizer=req.user)
+        return qs.filter(condition)\
+            .select_related('organizer').prefetch_related('drawings__genres')
 
 
 class ExhibitionDetailView(LoginRequiredMixin, genericviews.DetailView):
@@ -245,7 +262,7 @@ class GenresView(ViewAjaxGetMixin, genericviews.ListView):
     model = Genre
 
 
-class DrawingsView(ViewAjaxGetMixin, genericviews.ListView):
+class DrawingsAjaxListView(ViewAjaxGetMixin, genericviews.ListView):
     fields_to_serialize = ('id', 'name', 'image', 'genres')
     queryset = Drawing.objects.filter(hidden=False).prefetch_related('genres');
 

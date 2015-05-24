@@ -226,7 +226,7 @@
                 {% else %}
                     "{% url 'exhibition-drawings-preupdate' %}"
                 {% endif %};
-            const getDrawingsUrl = "{% url 'drawings' %}";
+            const getDrawingsUrl = "{% url 'drawings-list' %}";
             {% if xzibit %}
             const getExhibitionDrawingsUrl = "{% url 'exhibition-drawings' pk=xzibit.pk %}";
             {% endif %}
@@ -293,11 +293,9 @@
                             '<div class="list-group-item">' +
                             '<div class="media">'+
                             '<div class="media-left">'+
-                            '<a href="#">'+
                             '<img class="media-object" data-src="holder.js/64x64" alt="64x64"'+
                             'src="' + this.drawings[i].url + '"'+
                             'data-holder-rendered="true" style="width: 64px; height: 64px;">'+
-                            '</a>'+
                             '</div>'+
                             '<div class="media-body">'+
                             '<h4 class="media-heading">' + this.drawings[i].name + '</h4>'+
@@ -328,11 +326,9 @@
                             '<div class="list-group-item" onclick="Drawing.add(' + i + ')">' +
                             '<div class="media">'+
                             '<div class="media-left">'+
-                            '<a href="#">'+
                             '<img class="media-object" data-src="holder.js/64x64" alt="64x64"'+
                             'src="' + this.freeDrawings[i].url + '"'+
                             'data-holder-rendered="true" style="width: 64px; height: 64px;">'+
-                            '</a>'+
                             '</div>'+
                             '<div class="media-body">'+
                             '<h4 class="media-heading">' + this.freeDrawings[i].name + '</h4>'+
