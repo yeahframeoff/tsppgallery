@@ -253,8 +253,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         error_messages={
             'unique': _("A user with that username already exists."),
         })
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=30, blank=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=True,
+        validators=[
+            validators.RegexValidator(r'^[A-Z][a-z]+$',
+                                      _('Enter a valid name. This value may '
+                                        'contain only small and capital letters.'),
+                                      'invalid'),
+        ],
+    )
+    last_name = models.CharField(_('last name'), max_length=30, blank=True,
+        validators=[
+            validators.RegexValidator(r'^[A-Z][a-z]+$',
+                                      _('Enter a valid name. This value may '
+                                        'contain only small and capital letters.'),
+                                      'invalid'),
+        ],
+    )
     email = models.EmailField(_('email address'), blank=True)
     is_staff = models.BooleanField(_('staff status'), default=False,
         help_text=_('Designates whether the user can log into this admin '

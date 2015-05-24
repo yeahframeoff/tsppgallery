@@ -127,7 +127,7 @@ class Exhibition(models.Model):
         related_query_name='exhibition',
     )
     organizer = models.ForeignKey(Organizer, related_name='exhibitions', related_query_name='exhibition')
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, default='Exhibition', blank=True)
     publish_date = models.DateField(auto_now=True)
     approved = models.BooleanField(default=False)
     genres = models.ManyToManyField(
@@ -137,7 +137,7 @@ class Exhibition(models.Model):
         related_name='exhibitions',
         related_query_name='exhibition'
     )
-    description = models.TextField('описание выставки')
+    description = models.TextField('Описание выставки', default='', blank=True)
 
     def get_absolute_url(self):
         return reverse('exhibition-detail',args=[self.pk])

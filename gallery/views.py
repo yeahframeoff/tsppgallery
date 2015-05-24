@@ -18,6 +18,25 @@ from django.views import generic as genericviews
 import json
 
 
+def parse_ids_list(ids_list_str):
+    if len(ids_list_str.strip()) == 0:
+        return []
+    return [int(id) for id in ids_list_str.split(',')]
+
+
+def parse_ordered_ids_list(ids_list_str):
+    if len(ids_list_str.strip()) == 0:
+        return []
+    ids_list = ids_list_str.split(',')
+    length = len(ids_list_str)
+    ids_list = (int(id) for id in ids_list)
+    ids_list = (
+        (num, id) for num, id in
+        zip(range(1, length + 1), ids_list)
+    )
+    return ids_list
+
+
 def main(request):
     user = request.user
     if user.is_authenticated():
@@ -75,15 +94,9 @@ class DrawingForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save()
-        ids_list = self.ids_list.split(',')
-        length = len(ids_list)
-        ids_list = (int(id) for id in ids_list)
-        ids_list = (
-            (num, id) for num, id in
-            zip(range(1, length + 1), ids_list)
-        )
+        exhibition_drawings_ids_list = parse_ordered_ids_list(self.exhibition_drawings_ids_list)
         bulk = []
-        for num, id in ids_list:
+        for num, id in exhibition_drawings_ids_list:
             bulk.append(DrawingGenre(genre_id=id, priority=num))
         Drawing.objects.get(pk=instance.pk).drawinggenre_set = bulk
         return instance
@@ -95,7 +108,7 @@ def create_drawing(request):
         form = DrawingForm(request.POST, request.FILES)
         form.instance.artist = Artist.objects.get(pk=request.user.pk)
         if form.is_valid():
-            form.ids_list = request.session.get('drawing_genres_ids_list', '')
+            form.exhibition_drawings_ids_list = request.session.pop('drawing_genres_ids_list', '')
             instance = form.save()
             return HttpResponseRedirect(instance.get_absolute_url())
     else:
@@ -217,17 +230,15 @@ class ExhibitionForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save()
-        ids_list = self.ids_list.split(',')
-        length = len(ids_list)
-        ids_list = (int(id) for id in ids_list)
-        ids_list = (
-            (num, id) for num, id in
-            zip(range(1, length + 1), ids_list)
-        )
+        exhibition_genres_ids_list = parse_ordered_ids_list(self.exhibition_genres_ids_list)
         bulk = []
-        for num, id in ids_list:
+        for num, id in exhibition_genres_ids_list:
             bulk.append(ExhibitionGenre(genre_id=id, priority=num))
-        Exhibition.objects.get(pk=instance.pk).exhibitiongenre_set = bulk
+
+        xzibit = Exhibition.objects.get(pk=instance.pk)
+        xzibit.exhibitiongenre_set = bulk
+        exhibition_drawings_ids_list = parse_ids_list(self.exhibition_drawings_ids_list)
+        xzibit.drawings = exhibition_drawings_ids_list
         return instance
 
 
@@ -237,7 +248,8 @@ def create_exhibition_view(request):
         form = ExhibitionForm(request.POST)
         form.instance.organizer = Organizer.objects.get(pk=request.user.pk)
         if form.is_valid():
-            form.ids_list = request.session.get('exhibition_genres_ids_list', '')
+            form.exhibition_genres_ids_list = request.session.pop('exhibition_genres_ids_list', '')
+            form.exhibition_drawings_ids_list = request.session.pop('exhibition_drawings_ids_list', '')
             instance = form.save()
             return HttpResponseRedirect(instance.get_absolute_url())
     else:
@@ -363,13 +375,7 @@ def update_drawing_genres_order(request, drawing_id):
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
-    ids_list = ids_list.split(',')
-    length = len(ids_list)
-    ids_list = (int(id) for id in ids_list)
-    ids_list = (
-        (num, id) for num, id in
-        zip(range(1, length + 1), ids_list)
-    )
+    ids_list = parse_ordered_ids_list(ids_list)
     bulk = []
     DrawingGenre.objects.filter(drawing_id=drawing_id).delete()
     for num, id in ids_list:
@@ -386,13 +392,7 @@ def update_exhibition_genres_order(request, exhibition_id):
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
-    ids_list = ids_list.split(',')
-    length = len(ids_list)
-    ids_list = (int(id) for id in ids_list)
-    ids_list = (
-        (num, id) for num, id in
-        zip(range(1, length + 1), ids_list)
-    )
+    ids_list = parse_ordered_ids_list(ids_list)
     bulk = []
     ExhibitionGenre.objects.filter(exhibition_id=exhibition_id).delete()
     for num, id in ids_list:
@@ -423,13 +423,13 @@ def update_exhibition_drawings_list(request, exhibition_id):
     ids_list = request.POST.get('ids_order', None)
     if not ids_list:
         return HttpResponseBadRequest()
-    ids_list = [int(id) for id in ids_list.split(',')]
+    ids_list = parse_ids_list(ids_list)
     Exhibition.objects.get(pk=exhibition_id).drawings = ids_list
     return JsonResponse({'success': True})
 
 
 @user_passes_test(User.check_organizer)
-def preupdate_exhibition_drawings_list(request, exhibition_id):
+def preupdate_exhibition_drawings_list(request):
     ids_list = request.POST.get('ids_order', None)
     request.session['exhibition_drawings_ids_list'] = ids_list
     return JsonResponse({'success': True})
