@@ -16,7 +16,7 @@
             <li><a href="{% url 'drawings-index' %}">Drawings</a></li>
         </div>
         <div class="nav navbar-nav navbar-right">
-            <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>@{{ user.username }}</em></a></p>
+            <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>{{ user.full_name }}</em></a></p>
             <li><a href="{% url 'logout' %}">Log Out</a></li>
         </div>
     </div>

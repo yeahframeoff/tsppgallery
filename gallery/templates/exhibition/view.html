@@ -34,6 +34,7 @@
                 <div class="row">
                     <div class="col-xs-6 col-md-3">
                         <h2>{{ xzibit.name }}</h2>
+                        <h4>by <a href="{{ xzibit.organizer.get_absolute_url }}">{{ xzibit.organizer.full_name }}</a></h4>
                         <h3>Description</h3>
                         <p>{{ xzibit.description }}</p>
                         {% if xzibit.approved %}

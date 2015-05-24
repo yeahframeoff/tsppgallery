@@ -36,12 +36,7 @@
             <div class="affix pull-right panel">
                 <div class="row">
                     <div class="col-xs-6 col-md-3">
-                        <h3>Author</h3>
-                        <h4>
-                            <a href="{{ drawing.artist.get_absolute_url }}">
-                                {{ drawing.artist.full_name }}
-                            </a>
-                        </h4>
+                        <h4>by <a href="{{ drawing.artist.get_absolute_url }}">{{ drawing.artist.full_name }}</a></h4>
                         <h3>Genres</h3>
                         <ul class="list-group">
                             {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}

@@ -10,7 +10,10 @@
                 <div style="float:right; font-size: 85%; position: relative; top:-10px"><a href="{% url 'login' %}">Sign In</a></div>
             </div>
             <div class="panel-body" >
-                <form id="signupform" class="form-horizontal" role="form" action="" method="POST">
+                <form id="signupform" class="form-horizontal"
+                      role="form" action="{% url 'register' %}" method="POST"
+                      enctype="multipart/form-data">
+
                     {% csrf_token %}
 
                     <div id="signupalert" style="display:none" class="alert alert-danger">
@@ -109,11 +112,28 @@
                             {% endfor %}
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="icode" class="col-md-3 control-label">Role</label>
                         <div class="col-md-9">
                         {% load templatetags %}
                             {{ form.role|add_class:'form-control' }}
+                        </div>
+                    </div>
+
+                    <div class="form-group {% if form.photo.errors %} has-error has-feedback {% endif %}">
+                        <div class="col-md-9 col-md-push-3">
+                            <input id="{{ form.photo.id_for_label }}" type="file"
+                                   name="{{ form.photo.html_name }}"
+                                   style="display: none">
+                            <label for="{{ form.photo.id_for_label }}" class="btn btn-primary btn-block">Choose photo</label>
+
+                            {% if form.photo.errors %}
+                                <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                            {% endif %}
+                            {% for msg in form.photo.errors %}
+                                <span class="help-block">{{ msg }}</span>
+                            {% endfor %}
                         </div>
                     </div>
 

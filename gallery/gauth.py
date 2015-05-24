@@ -244,7 +244,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_('Required. 4-20 characters. Small letters, digits,'
                     'dot and underscore characters.'),
         validators=[
-            validators.RegexValidator(r'^[a-z0-9._]{4,20}$',
+            validators.RegexValidator(r'^[A-Za-z0-9._]{4,20}$',
                                       _('Enter a valid username. '
                                         'This value may contain only small letters, digits, '
                                         'dot and underscore characters.'),
@@ -282,16 +282,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
-        if not self.first_name and not self.last_name:
-            full_name = self.username
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        if not self.first_name or not self.last_name:
+            full_name = '@' + self.username
+        else:
+            full_name = '%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
         "Returns the short name for the user."
-        if not self.first_name and not self.last_name:
-            short_name = self.username
-        short_name = "%.1s. %s" % (self.first_name, self.last_name)
+        if not self.first_name or not self.last_name:
+            short_name = '@' + self.username
+        else:
+            short_name = "%.1s. %s" % (self.first_name, self.last_name)
         return short_name.strip()
 
     def email_user(self, subject, message, from_email=None, **kwargs):
@@ -329,9 +331,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 class UserCreationForm(authforms.UserCreationForm):
     class Meta(authforms.UserCreationForm.Meta):
         model = User
-        fields = ('username', 'role')
+        fields = ('username', 'role', 'photo')
 
-    role = forms.TypedChoiceField(choices=Role.ROLES_FORM_LIST  )
+    role = forms.TypedChoiceField(choices=Role.ROLES_FORM_LIST)
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        return username.lower()
+
 
 
 class UserChangeForm(authforms.UserChangeForm):

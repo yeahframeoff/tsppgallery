@@ -29,7 +29,7 @@ def register(request):
     if not request.user.is_anonymous():
         logout(request)
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = UserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             new_user = authenticate(

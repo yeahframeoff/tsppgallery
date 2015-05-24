@@ -42,8 +42,7 @@ class Artist(User):
         if not isinstance(drawing, Drawing):
             return Drawing.objects.filter(pk=drawing, artist=self.id).exists()
         else :
-            return drawing.artist_id == self.id or \
-                   drawing.artist_id == self.id.id
+            return drawing.artist_id == self.id
 
 
 class OrganizerManager(UserManager):
@@ -68,8 +67,7 @@ class Organizer(User):
         if not isinstance(exhibition, Exhibition):
             return Exhibition.objects.filter(pk=exhibition, organizer=self.id).exists()
         else:
-            return exhibition.organizer_id == self.id or \
-                   exhibition.organizer_id == self.id.id
+            return exhibition.organizer_id == self.id
 
 
 class Genre(models.Model):
