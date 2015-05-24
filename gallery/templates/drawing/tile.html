@@ -10,17 +10,19 @@
         </div>
         <div class="media-body">
             <h4 class="media-heading">
-                <a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a>
+                {% block header %}
+                    <a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a>
                     {% if drawing.exhibition__count > 0 %}
                         <a href="{{ drawing.get_related_exhibitions_page_url }}"
                            title="{{ drawing.exhibition__count }} exhibitions" class="badge">
                             {{ drawing.exhibition__count }}
                         </a>
                     {% endif %}
-                    </h4>
+                {% endblock %}
+            </h4>
             <h5>Genres:
                 {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
-                    <span class="label label-default">{{ genre }}</span>
+                    <a href="{{ genre.get_related_drawings_page_url }}" class="label label-default">{{ genre }}</a>
                 {% endfor %}
             </h5>
         </div>

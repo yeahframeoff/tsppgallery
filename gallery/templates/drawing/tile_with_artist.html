@@ -1,0 +1,5 @@
+{% extends 'drawing/tile.html' %}
+{% block header %}
+    {{ block.super }}
+    by <a href="{{ drawing.artist.get_absolute_url }}">@{{ drawing.artist }}</a>
+{% endblock %}

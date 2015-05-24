@@ -79,6 +79,9 @@ class Genre(models.Model):
     def get_related_exhibitions_page_url(self):
         return '%s?genre=%d' % (reverse('exhibitions-index'), self.pk)
 
+    def get_related_drawings_page_url(self):
+        return '%s?genre=%d' % (reverse('drawings-index'), self.pk)
+
     class Meta:
         verbose_name = _('genre')
         verbose_name_plural = _('genres')

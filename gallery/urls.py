@@ -14,6 +14,7 @@ auth_patterns = (
 )
 
 drawing_patterns = (
+    url(r'^drawings$', views.DrawingsView.as_view(), name='drawings-index'),
     url(r'^drawings/list$', views.DrawingsAjaxListView.as_view(), name='drawings-list'),
     url(r'^drawings/(?P<pk>\d+)$', views.DrawingDetailView.as_view(), name='drawing-detail'),
     url(r'^drawings/(?P<pk>\d+)/edit$', views.DrawingEditView.as_view(), name='drawing-edit'),

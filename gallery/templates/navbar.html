@@ -13,7 +13,7 @@
         </div>
         <div class="nav navbar-nav">
             <li><a href="{% url 'exhibitions-index' %}">Exhibitions</a></li>
-            <li><a href="#">Drawings</a></li>
+            <li><a href="{% url 'drawings-index' %}">Drawings</a></li>
         </div>
         <div class="nav navbar-nav navbar-right">
             <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>@{{ user.username }}</em></a></p>

@@ -159,7 +159,6 @@ class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
     context_object_name = 'exhibitions'
 
     def get_queryset(self):
-        print('Get Queryset RAnshe!!!')
         req = self.request
         qs = Exhibition.objects.all()
         drawing_id = int(req.GET.get('drawing', 0))
@@ -180,6 +179,28 @@ class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
             context['genre'] = Genre.objects.get(id=self.genre_id)
         if hasattr(self, 'drawing_id'):
             context['drawing'] = Drawing.objects.get(id=self.drawing_id)
+        return context
+
+
+class DrawingsView(LoginRequiredMixin, genericviews.ListView):
+    template_name = 'drawing/index.html'
+    context_object_name = 'drawings'
+
+    def get_queryset(self):
+        req = self.request
+        qs = Drawing.objects.all()
+        genre_id = int(req.GET.get('genre', 0))
+        if genre_id:
+            self.genre_id = genre_id
+            qs = qs.filter(genres=genre_id)
+        condition = Q(hidden=False) | Q(hidden=True, artist=req.user)
+        return qs.filter(condition)\
+            .select_related('artist').prefetch_related('genres')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if hasattr(self, 'genre_id'):
+            context['genre'] = Genre.objects.get(id=self.genre_id)
         return context
 
 
