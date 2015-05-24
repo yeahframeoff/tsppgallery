@@ -11,6 +11,7 @@
     {% endblock %}
 
     {% block content %}
+        {% load templatetags %}
         <div class="media">
             {% for drawing in xzibit.drawings.all %}
                 <div class="col-xs-3">
@@ -23,5 +24,10 @@
             {% endfor %}
             {% include 'exhibition/edit-btn-span.html' with xzibit=xzibit user=user %}
         </div>
+        <h5>
+            {% for genre in xzibit.genres.all|order_by:'exhibitiongenre__priority' %}
+                <a href="{{ genre.get_related_exhibitions_page_url }}" class="label label-default">{{ genre }}</a>
+            {% endfor %}
+        </h5>
     {% endblock %}
 </div>

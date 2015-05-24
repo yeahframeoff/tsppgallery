@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Count
 from .gauth import Role, User, UserManager
 from django.utils.translation import ugettext_lazy as _
 
@@ -75,9 +76,17 @@ class Genre(models.Model):
     name = models.CharField(max_length=32)
     __str__ = lambda self: self.name
 
+    def get_related_exhibitions_page_url(self):
+        return '%s?genre=%d' % (reverse('exhibitions-index'), self.pk)
+
     class Meta:
         verbose_name = _('genre')
         verbose_name_plural = _('genres')
+
+
+class DrawingWithCountManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().annotate(Count('exhibition'))
 
 
 class Drawing(models.Model):
@@ -95,6 +104,8 @@ class Drawing(models.Model):
     hidden = models.BooleanField('спрятано', default=False)
     date_uploaded = models.DateTimeField('загружено', auto_now=True)
     __str__ = lambda self: self.name
+
+    objects = DrawingWithCountManager()
 
     def get_absolute_url(self):
         return reverse('drawing-detail',args=[self.pk])

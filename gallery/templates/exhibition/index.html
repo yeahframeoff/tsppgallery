@@ -1,7 +1,22 @@
 {% extends 'base-cf.html' %}
 
-{% block title %} Exhibitions {% endblock %}
+{% block title %}
+    {% if genre %}
+        Exhibitions of genre "{{ genre }}"
+    {% elif drawing %}
+        Exhibitions with drawing #{{ drawing.pk }}" {{ drawing }}"
+    {% else %}
+        Exhibitions
+    {% endif %}
+{% endblock %}
 {% block content %}
+    {% if genre %}
+        <h3>Exhibitions of genre "{{ genre }}"</h3>
+    {% elif drawing %}
+        <h3>Exhibitions with drawing #{{ drawing.pk }}" {{ drawing }}"</h3>
+    {% else %}
+        <h3>Exhibitions</h3>
+    {% endif %}
     <div class="row">
         <div class="list-group">
             {% for xzibit in exhibitions %}

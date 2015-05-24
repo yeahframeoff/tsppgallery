@@ -9,7 +9,15 @@
             </a>
         </div>
         <div class="media-body">
-            <h4 class="media-heading"><a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a></h4>
+            <h4 class="media-heading">
+                <a href="{{ drawing.get_absolute_url }}">{{ drawing.name }}</a>
+                    {% if drawing.exhibition__count > 0 %}
+                        <a href="{{ drawing.get_related_exhibitions_page_url }}"
+                           title="{{ drawing.exhibition__count }} exhibitions" class="badge">
+                            {{ drawing.exhibition__count }}
+                        </a>
+                    {% endif %}
+                    </h4>
             <h5>Genres:
                 {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
                     <span class="label label-default">{{ genre }}</span>

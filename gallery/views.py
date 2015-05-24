@@ -63,10 +63,9 @@ class OrganizerDetailView(LoginRequiredMixin, genericviews.DetailView):
 
 
 class DrawingDetailView(LoginRequiredMixin, genericviews.DetailView):
-    # model = Drawing
+    model = Drawing
     template_name = 'drawing/view.html'
     context_object_name = 'drawing'
-    queryset = Drawing.objects.all().annotate(Count('exhibition'))
 
 
 class DrawingForm(forms.ModelForm):
@@ -160,14 +159,28 @@ class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
     context_object_name = 'exhibitions'
 
     def get_queryset(self):
+        print('Get Queryset RAnshe!!!')
         req = self.request
         qs = Exhibition.objects.all()
         drawing_id = int(req.GET.get('drawing', 0))
         if drawing_id:
+            self.drawing_id = drawing_id
             qs = qs.filter(drawings=drawing_id)
+        genre_id = int(req.GET.get('genre', 0))
+        if genre_id:
+            self.genre_id = genre_id
+            qs = qs.filter(genres=genre_id)
         condition = Q(approved=True) | Q(approved=False, organizer=req.user)
         return qs.filter(condition)\
             .select_related('organizer').prefetch_related('drawings__genres')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if hasattr(self, 'genre_id'):
+            context['genre'] = Genre.objects.get(id=self.genre_id)
+        if hasattr(self, 'drawing_id'):
+            context['drawing'] = Drawing.objects.get(id=self.drawing_id)
+        return context
 
 
 class ExhibitionDetailView(LoginRequiredMixin, genericviews.DetailView):
