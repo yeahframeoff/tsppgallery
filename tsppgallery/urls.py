@@ -5,6 +5,7 @@ from django.conf import settings
 urlpatterns = (
     url(r'^', include('gallery.urls')),
     url(r'^admin/', include(admin.site.urls), name='admin'),
+    url(r'^grappelli/', include('grappelli.urls')),
 )
 if settings.DEBUG:
     urlpatterns += (

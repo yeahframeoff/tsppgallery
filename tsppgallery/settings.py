@@ -32,6 +32,7 @@ AUTH_USER_MODEL = 'gallery.User'
 # Application definition
 
 INSTALLED_APPS = (
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -73,6 +74,13 @@ TEMPLATES = [
     },
 ]
 
+from django.conf import global_settings
+
+TEMPLATE_CONTEXT_PROCESSORS =\
+    global_settings.TEMPLATE_CONTEXT_PROCESSORS +\
+    ('django.core.context_processors.request',)
+
+
 WSGI_APPLICATION = 'tsppgallery.wsgi.application'
 
 
@@ -85,6 +93,8 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+GRAPPELLI_ADMIN_TITLE = 'Witnesses & Yegors: Gallery'
 
 
 # Internationalization

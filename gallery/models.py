@@ -140,7 +140,7 @@ class Exhibition(models.Model):
                                   related_query_name='exhibition')
     name = models.CharField('назва', max_length=32, default='Exhibition', blank=True)
     publish_date = models.DateField('дата публікації', auto_now=True)
-    approved = models.BooleanField('перевірено', default=False)
+    approved = models.BooleanField('виставку перевірено', default=False)
     genres = models.ManyToManyField(
         Genre,
         verbose_name='жанри',
