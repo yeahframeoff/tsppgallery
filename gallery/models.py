@@ -17,6 +17,8 @@ class Admin(User):
     objects = AdminManager()
     class Meta(User.Meta):
         proxy = True
+        verbose_name = 'адміністратор'
+        verbose_name_plural = 'адміністратори'
 
     def get_absolute_url(self):
         return reverse('admin:index')
@@ -34,6 +36,8 @@ class Artist(User):
     objects = ArtistManager()
     class Meta(User.Meta):
         proxy = True
+        verbose_name = 'художник'
+        verbose_name_plural = 'художники'
 
     def get_absolute_url(self):
         return reverse('artist-detail',args=[self.pk])
@@ -57,8 +61,8 @@ class Organizer(User):
     objects = OrganizerManager()
     class Meta(User.Meta):
         proxy = True
-        verbose_name = _('organizer')
-        verbose_name_plural = _('organizers')
+        verbose_name = 'організатор виставок'
+        verbose_name_plural = 'організатори виставок'
 
     def get_absolute_url(self):
         return reverse('organizer-detail', args=[self.pk])
@@ -71,7 +75,7 @@ class Organizer(User):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField('назва', max_length=32)
     __str__ = lambda self: self.name
 
     def get_related_exhibitions_page_url(self):
@@ -81,8 +85,8 @@ class Genre(models.Model):
         return '%s?genre=%d' % (reverse('drawings-index'), self.pk)
 
     class Meta:
-        verbose_name = _('genre')
-        verbose_name_plural = _('genres')
+        verbose_name = 'жанр'
+        verbose_name_plural = 'жанри'
 
 
 class DrawingWithCountManager(models.Manager):
@@ -91,19 +95,23 @@ class DrawingWithCountManager(models.Manager):
 
 
 class Drawing(models.Model):
-    image = models.ImageField(upload_to='images/%Y/%m/')
-    name = models.CharField(max_length=32, default='Drawing', blank=True)
-    description = models.TextField(default='', blank=True)
-    artist = models.ForeignKey(Artist, related_name='drawings', related_query_name='drawing')
+    image = models.ImageField('зображення', upload_to='images/%Y/%m/')
+    name = models.CharField('назва', max_length=32, default='Drawing', blank=True)
+    description = models.TextField('детальний опис', default='', blank=True)
+    artist = models.ForeignKey(Artist,
+                               verbose_name='художник',
+                               related_name='drawings',
+                               related_query_name='drawing')
     genres = models.ManyToManyField(
         Genre,
         through='DrawingGenre',
         through_fields=('drawing', 'genre'),
         related_name='drawings',
-        related_query_name='drawing'
+        related_query_name='drawing',
+        verbose_name='жанри'
     )
-    hidden = models.BooleanField('спрятано', default=False)
-    date_uploaded = models.DateTimeField('загружено', auto_now=True)
+    hidden = models.BooleanField('малюнок сховано', default=False)
+    date_uploaded = models.DateTimeField('завантажено', auto_now=True)
     __str__ = lambda self: self.name
 
     objects = DrawingWithCountManager()
@@ -115,8 +123,8 @@ class Drawing(models.Model):
         return '%s?drawing=%d' % (reverse('exhibitions-index'), self.pk)
 
     class Meta:
-        verbose_name = _('drawing')
-        verbose_name_plural = _('drawings')
+        verbose_name = 'малюнок'
+        verbose_name_plural = 'малюнки'
 
 
 
@@ -126,18 +134,22 @@ class Exhibition(models.Model):
         related_name='exhibitions',
         related_query_name='exhibition',
     )
-    organizer = models.ForeignKey(Organizer, related_name='exhibitions', related_query_name='exhibition')
-    name = models.CharField(max_length=32, default='Exhibition', blank=True)
-    publish_date = models.DateField(auto_now=True)
-    approved = models.BooleanField(default=False)
+    organizer = models.ForeignKey(Organizer,
+                                  verbose_name='організатор',
+                                  related_name='exhibitions',
+                                  related_query_name='exhibition')
+    name = models.CharField('назва', max_length=32, default='Exhibition', blank=True)
+    publish_date = models.DateField('дата публікації', auto_now=True)
+    approved = models.BooleanField('перевірено', default=False)
     genres = models.ManyToManyField(
         Genre,
+        verbose_name='жанри',
         through='ExhibitionGenre',
         through_fields=('exhibition', 'genre'),
         related_name='exhibitions',
         related_query_name='exhibition'
     )
-    description = models.TextField('Описание выставки', default='', blank=True)
+    description = models.TextField('Детальний опис', default='', blank=True)
 
     def get_absolute_url(self):
         return reverse('exhibition-detail',args=[self.pk])
@@ -146,15 +158,15 @@ class Exhibition(models.Model):
         return '%d %s' % (self.pk, self.name)
 
     class Meta:
-        verbose_name = _('exhibition')
-        verbose_name_plural = _('exhibitions')
+        verbose_name = 'виставка'
+        verbose_name_plural = 'виставки'
         ordering = ('id',)
 
 
 class DrawingGenre(models.Model):
     drawing = models.ForeignKey(Drawing)
-    genre = models.ForeignKey(Genre)
-    priority = models.PositiveIntegerField()
+    genre = models.ForeignKey(Genre, verbose_name='жанр')
+    priority = models.PositiveIntegerField('приорітет')
 
     def __str__(self):
         return "%d: drawing:%d, num:%d, genre:%d" %\
@@ -168,8 +180,8 @@ class DrawingGenre(models.Model):
 
 class ExhibitionGenre(models.Model):
     exhibition = models.ForeignKey(Exhibition)
-    genre = models.ForeignKey(Genre)
-    priority = models.PositiveIntegerField()
+    genre = models.ForeignKey(Genre, verbose_name='жанр')
+    priority = models.PositiveIntegerField('приорітет')
 
     def __str__(self):
         return "%d: xzibit:%d, num:%d, genre:%d" %\

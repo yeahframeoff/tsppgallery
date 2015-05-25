@@ -40,20 +40,27 @@ class UserAdmin(UserAdmin):
 
 class DrawingHasGenresInline(admin.StackedInline):
     model = models.Drawing.genres.through
+    verbose_name = 'жанр'
+    verbose_name_plural = 'жанри малюнка'
 
 
 class ExhibitionHasGenresInline(admin.StackedInline):
     model = models.Exhibition.genres.through
+    verbose_name = 'жанр'
+    verbose_name_plural = 'жанри виставки'
+
 
 
 class ExhibitionHasDrawingsInline(admin.StackedInline):
     model = models.Exhibition.drawings.through
+    verbose_name = 'малюнки'
+    verbose_name_plural = 'малюнки цієї виставки'
 
 
 @admin.register(models.Drawing)
 class DrawingAdmin(admin.ModelAdmin):
     inlines = (DrawingHasGenresInline,)
-    fields = ('name', 'description', 'artist', 'image')
+    fields = ('name', 'description', 'artist', 'image', 'hidden')
     save_as = True
     save_on_top = True
 
