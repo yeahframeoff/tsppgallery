@@ -41,7 +41,7 @@
                         <ul class="list-group">
                             {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
                             <li class="list-group-item" style="height: 56px; line-height: 34px;">
-                                {{ genre.name }}
+                                <a href="{{ genre.get_related_drawings_page_url }}">{{ genre.name }}</a>
                             </li>
                             {% endfor %}
                         </ul>
