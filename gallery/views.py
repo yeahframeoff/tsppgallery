@@ -178,10 +178,15 @@ class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
         if drawing_id:
             self.drawing_id = drawing_id
             qs = qs.filter(drawings=drawing_id)
-        genre_id = int(req.GET.get('genre', 0))
+        genre_id = req.GET.get('genre')
         if genre_id:
-            self.genre_id = genre_id
-            qs = qs.filter(genres=genre_id)
+            genre_id = int(genre_id)
+            if genre_id > 0:
+                self.genre_id = genre_id
+                qs = qs.filter(genres=genre_id)
+            else:
+                qs = qs.annotate(genres_count=Count('genres'))\
+                    .filter(genres_count=0)
         condition = Q(approved=True) | Q(approved=False, organizer=req.user)
         return qs.filter(condition)\
             .select_related('organizer').prefetch_related('drawings__genres')
@@ -202,10 +207,23 @@ class DrawingsView(LoginRequiredMixin, genericviews.ListView):
     def get_queryset(self):
         req = self.request
         qs = Drawing.objects.all()
+<<<<<<< HEAD
         genre_id = int(req.GET.get('genre', 0))
         if genre_id:
             self.genre_id = genre_id
             qs = qs.filter(genres=genre_id)
+=======
+        genre_id = req.GET.get('genre')
+        if genre_id:
+            genre_id = int(genre_id)
+            if genre_id > 0:
+                self.genre_id = genre_id
+                qs = qs.filter(genres=genre_id)
+            else:
+                qs = qs.annotate(genres_count=Count('genres'))\
+                    .filter(genres_count=0)
+
+>>>>>>> FETCH_HEAD
         condition = Q(hidden=False) | Q(hidden=True, artist=req.user)
         return qs.filter(condition)\
             .select_related('artist').prefetch_related('genres')

@@ -247,7 +247,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             validators.RegexValidator(r'^[A-Za-z0-9._]{4,20}$',
                                       _('Enter a valid username. '
                                         'This value may contain only small letters, digits, '
-                                        'dot and underscore characters.'),
+                                        'dot and underscore characters. '
+                                        'From 4 up to 20 characters.'),
                                       'invalid'),
         ],
         error_messages={

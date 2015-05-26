@@ -1,9 +1,12 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="nav navbar-nav navbar-left">
+<<<<<<< HEAD
 			<button class="btn btn-primary" onclick="history.back(-1)">
 				<span class="glyphicon glyphicon-arrow-left"></span> Назад
 			</button>
+=======
+>>>>>>> FETCH_HEAD
             {% if user.is_artist %}
                 <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
                     <span class="glyphicon glyphicon-pencil"></span> Add drawing
@@ -23,4 +26,8 @@
             <li><a href="{% url 'logout' %}">Log Out</a></li>
         </div>
     </div>
+<<<<<<< HEAD
 </nav>
+=======
+</nav>
+>>>>>>> FETCH_HEAD
