@@ -1,0 +1,7 @@
+.idea/*
+*.pyc
+*.pyo
+*.sqlite3
+__pycache__
+tsppgallery/local_settings.py
+uploads

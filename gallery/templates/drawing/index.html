@@ -1,0 +1,27 @@
+{% extends 'base-cf.html' %}
+
+{% block title %}
+    {% if genre %}
+        Drawings of genre "{{ genre }}"
+    {% else %}
+        Drawings
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+	<ul class="list-group" id="genreList">
+            {% for genre in genres %}
+               <li><a href="#" class="label label-default">qwe</a></li>
+            {% endfor %}
+    </ul>	
+    {% if genre %}
+        <h3>Drawings of genre "{{ genre }}"</h3>
+    {% endif %}
+    <div class="row">
+        <div class="list-group">
+            {% for drawing in drawings %}
+                {% include 'drawing/tile_with_artist.html' %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

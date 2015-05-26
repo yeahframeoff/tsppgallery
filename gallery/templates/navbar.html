@@ -1,0 +1,26 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="nav navbar-nav navbar-left">
+			<button class="btn btn-primary" onclick="history.back(-1)">
+				<span class="glyphicon glyphicon-arrow-left"></span> Назад
+			</button>
+            {% if user.is_artist %}
+                <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
+                    <span class="glyphicon glyphicon-pencil"></span> Add drawing
+                </a>
+            {% elif user.is_organizer %}
+                <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
+                    <span class="glyphicon glyphicon-th"></span> Add Exhibition
+                </a>
+            {% endif %}
+        </div>
+        <div class="nav navbar-nav">
+            <li><a href="{% url 'exhibitions-index' %}">Exhibitions</a></li>
+            <li><a href="{% url 'drawings-index' %}">Drawings</a></li>
+        </div>
+        <div class="nav navbar-nav navbar-right">
+            <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>{{ user.full_name }}</em></a></p>
+            <li><a href="{% url 'logout' %}">Log Out</a></li>
+        </div>
+    </div>
+</nav>

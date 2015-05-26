@@ -1,0 +1,50 @@
+{% extends 'base-cf.html' %}
+
+{% block style %}
+    <style>
+        .col-lg-4 > .affix.panel{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block title %} Organizer {{ artist.full_name }} {% endblock %}
+{% block content %}
+    {% load staticfiles %}
+    {% static 'gallery/img/default_img_org.jpg' as default_ava %}
+    <div class="row">
+        <div class="col-lg-8">
+            {% if not org.exhibitions.all %}
+                <h4>There are no exhibitions yet. <em>Create the first one!</em></h4>
+                <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
+                    <span class="glyphicon glyphicon-th"></span> Add Exhibition
+                </a>
+            {% else %}
+                <div class="list-group">
+                {% for xzibit in org.exhibitions.all %}
+                    {% include 'exhibition/tile.html' %}
+                {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            <div class="affix pull-right panel">
+                <div class="row">
+                    <div class="col-xs-6 col-md-3">
+                        <div class="thumbnail">
+                            <img alt="{{ org.full_name }}" title="{{ org.full_name }}"
+                                 src="{% if org.photo %}
+                                          {{ org.photo.url }}
+                                      {% else %}
+                                          {{ default_ava }}
+                                      {% endif %}">
+                        </div>
+                        <h3>{{ org.full_name }}</h3>
+                        <h4>{{ org.bio }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

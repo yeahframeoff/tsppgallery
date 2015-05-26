@@ -1,0 +1,33 @@
+<div class="list-group-item h4">
+    {% block header %}
+        {% if xzibit.approved %}
+            <a href="{{ xzibit.get_absolute_url }}">{{ xzibit.name }}</a>
+        {% else %}
+            <span class="glyphicon glyphicon-alert" title="Exhibition is waiting for admin approval"></span>
+            <a href="{{ xzibit.get_absolute_url }}" style="color: gray">
+                {{ xzibit.name }}
+            </a>
+        {% endif %}
+    {% endblock %}
+
+    {% block content %}
+        {% load templatetags %}
+        <div class="media">
+            {% for drawing in xzibit.drawings.all %}
+                <div class="col-xs-3">
+                    <a href="{{ drawing.get_absolute_url }}" class="thumbnail">
+                        <img data-src="holder.js/100%x180" alt="100%x180"
+                             src="{{ drawing.image.url }}" data-holder-rendered="true"
+                             style="height: 120px; display: block;">
+                    </a>
+                </div>
+            {% endfor %}
+            {% include 'exhibition/edit-btn-span.html' with xzibit=xzibit user=user %}
+        </div>
+        <h5>
+            {% for genre in xzibit.genres.all|order_by:'exhibitiongenre__priority' %}
+                <a href="{{ genre.get_related_exhibitions_page_url }}" class="label label-default">{{ genre }}</a>
+            {% endfor %}
+        </h5>
+    {% endblock %}
+</div>

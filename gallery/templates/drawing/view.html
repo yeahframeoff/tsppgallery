@@ -1,0 +1,53 @@
+{% extends 'base-cf.html' %}
+
+{% block title %} {% endblock %}
+{% block style %}
+    <style>
+        .col-lg-4 > .affix.panel{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% load templatetags %}
+    <div class="row">
+        <div class="col-lg-8">
+            <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" src="{{ drawing.image.url }}">
+            <div class="row">
+                <div class="col-sm-10">
+                    <h3>{{ drawing.name }}
+                        {% if drawing.exhibition__count > 0 %}
+                            <a href="{{ drawing.get_related_exhibitions_page_url }}" class="badge">{{ drawing.exhibition__count }} exhibitions</a>
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="imageBtn pull-right">
+                    {% include 'drawing/edit-btn-span.html' %}
+                </div>
+            </div>
+            <p>
+                {{ drawing.description }}
+            </p>
+
+        </div>
+        <div class="col-lg-4">
+            <div class="affix pull-right panel">
+                <div class="row">
+                    <div class="col-xs-6 col-md-3">
+                        <h4>by <a href="{{ drawing.artist.get_absolute_url }}">{{ drawing.artist.full_name }}</a></h4>
+                        <h3>Genres</h3>
+                        <ul class="list-group">
+                            {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
+                            <li class="list-group-item" style="height: 56px; line-height: 34px;">
+                                <a href="{{ genre.get_related_drawings_page_url }}">{{ genre.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

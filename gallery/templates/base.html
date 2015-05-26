@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %} {% endblock %}</title>
+    {% if user.is_authenticated %}
+    <style>
+        body {
+            padding-top: 70px;
+        }
+    </style>
+    {% endif %}
+    {% block style %}{% endblock %}
+
+    {% load staticfiles %}
+    <script src="{% static 'gallery/js/jquery.min.js' %}"></script>
+    <script src="{% static 'gallery/js/bootstrap.min.js' %} "></script>
+
+    <!-- Bootstrap -->
+    <link href="{% static 'gallery/css/bootstrap.css' %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="{% static 'gallery/js/html5shiv.min.js' %}"></script>
+    <script src="{% static 'gallery/js/respond.min.js' %}"></script>
+    <![endif]-->
+    {% block script %} {% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+    {% include 'navbar.html' %}
+{% endif %}
+<div class="{% block container %} container {% endblock %}">
+    {% block content %}
+    {% endblock%}
+</div>
+
+</body>
+</html>

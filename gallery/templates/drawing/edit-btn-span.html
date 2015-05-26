@@ -1,0 +1,16 @@
+{% load templatetags %}
+<div class="pull-right">
+    {% if user|owns_drawing:drawing %}
+        <form action="{% url 'drawing-delete' drawing.pk %}" method="POST">
+            <a class="btn btn-warning"
+                    href="{% url 'drawing-edit' drawing.pk %}">
+                <span class="glyphicon glyphicon-pencil"></span>
+            </a>
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Are you sure?');">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+        </form>
+    {% endif %}
+</div>

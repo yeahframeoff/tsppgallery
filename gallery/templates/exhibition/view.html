@@ -1,0 +1,58 @@
+{% extends 'base-cf.html' %}
+
+{% block title %} Exhibition {{ xzibit.name }} {% endblock %}
+
+{% block style %}
+    <style>
+        .col-lg-4 > .affix.panel{
+            width: 100%;
+            height: 100%;
+        }
+        .media > div{
+            display: inline-block;
+        }
+
+        .media > .media-body{
+            width: 75%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% load templatetags %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="list-group">
+                {% for drawing in xzibit.drawings.all %}
+                    {% include 'drawing/tile.html' %}
+                {% endfor %}
+            </div>
+            {% include 'exhibition/edit-btn-span.html' %}
+        </div>
+        <div class="col-lg-4">
+            <div class="affix pull-right panel">
+                <div class="row">
+                    <div class="col-xs-6 col-md-3">
+                        <h2>{{ xzibit.name }}</h2>
+                        <h4>by <a href="{{ xzibit.organizer.get_absolute_url }}">{{ xzibit.organizer.full_name }}</a></h4>
+                        <h3>Description</h3>
+                        <p>{{ xzibit.description }}</p>
+                        {% if xzibit.approved %}
+                            <p class="text-success">Approved</p>
+                        {% else %}
+                            <p class="text-muted">Not approved</p>
+                        {% endif %}
+                        <h3>Genres</h3>
+                        <ul class="list-group">
+                            {% for genre in xzibit.genres.all|order_by:'exhibitiongenre__priority' %}
+                            <li class="list-group-item" style="height: 56px; line-height: 34px;">
+                                {{ genre.name }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

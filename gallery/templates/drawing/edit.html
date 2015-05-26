@@ -1,0 +1,289 @@
+{% extends 'base-cf.html' %}
+{% block title %} {% endblock %}
+
+{% block style %}
+    <style>
+        .col-lg-4 > .affix.panel {
+            width: 100%;
+            height: 100%;
+        }
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .row{height:100%;}
+        .row > div {height:100%;}
+        #genreList {
+            overflow: auto;
+            max-height: 35%;
+        }
+        #menu3 {
+            max-height: 300px;
+            overflow: auto;
+        }
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        $(function(){
+			function readURL(input) {
+				if (input.files && input.files[0]) {
+				    var reader = new FileReader();
+				    
+				    reader.onload = function (e) {
+				        $('#imgPreview').attr('src', e.target.result);
+				    }
+				    
+				    reader.readAsDataURL(input.files[0]);
+				}
+			}
+    
+			$("#exampleInputFile").change(function(){
+				readURL(this);
+			});
+
+
+            const isNewEntry = {% if drawing %} false {% else %} true {% endif %};
+            const updateGenresOrderUrl =
+                {% if drawing %}
+                    "{% url 'drawing-genres-update' drawing.pk %}"
+                {% else %}
+                    "{% url 'drawing-genres-preupdate'%}"
+                {% endif %};
+            const getGenresUrl = "{% url 'genres' %}";
+            {% if drawing %}
+            const getDrawingGenresUrl = "{% url 'drawing-genres' pk=drawing.pk %}";
+            {% endif %}
+            Genre = {
+                genres: [],
+                genresCopy: null,
+                allGenres: [],
+                freeGenres: [],
+
+                saveGenres: function () {
+                    this.genresCopy = this.genres.slice(0, this.genres.length);
+                },
+
+                restoreGenres: function () {
+                    this.genres = this.genresCopy;
+                },
+
+                reportToServer: function (successCallback, failCallback) {
+                    var success = false;
+                    var genres_ids = $.map(this.genres, function(x) { return x.id; });
+                    var stringified = genres_ids.join(',');
+                    var This = this;
+                    $.post(updateGenresOrderUrl,
+                            {'ids_order':stringified,
+                             'csrfmiddlewaretoken':"{{ csrf_token }}"},
+                            'json'
+                    ).done(function(data) {
+                        success = !!data.success;
+                    }).always(function() {
+                        if (!Array.isArray(successCallback))
+                            successCallback = [successCallback];
+                        if (!Array.isArray(failCallback))
+                            failCallback = [failCallback];
+                        var execute = success ? successCallback : failCallback;
+                        for (var k in execute)
+                            execute[k].call(This);
+                    });
+                },
+
+                up: function (i) {
+                    this.saveGenres();
+                    var genres = this.genres;
+                    if (i > 0) {
+                        var genre = genres[i - 1];
+                        genres[i - 1] = genres[i];
+                        genres[i] = genre;
+                    }
+                    this.reportToServer(this.showList, this.restoreGenres);
+                },
+
+                down: function (i) {
+                    this.saveGenres();
+                    var genres = this.genres;
+                    if (i < genres.length - 1) {
+                        var genre = genres[i + 1];
+                        genres[i + 1] = genres[i];
+                        genres[i] = genre;
+                    }
+                    this.reportToServer(this.showList, this.restoreGenres);
+                },
+
+                remove: function (i) {
+                    this.saveGenres();
+                    this.genres.splice(i,1);
+                    this.reportToServer(
+                        [this.showList, this.refreshFree],
+                        this.restoreGenres
+                    );
+                },
+
+                add: function (i) {
+                    this.saveGenres();
+                    this.genres.push(this.freeGenres[i]);
+                    this.reportToServer(
+                        [this.showList, this.refreshFree],
+                        this.restoreGenres
+                    );
+                },
+
+                showList: function () {
+                    var elem = $('#genreList');
+                    elem.html('');
+                    for (var i in this.genres) {
+                        elem.append(
+                            '<li class="list-group-item" style="height: 56px; line-height: 34px;">'+
+                            '<span class="genre-name">'+ this.genres[i].name+'</span>'+
+                            '<button type="button" class="btn btn-danger pull-right" '+
+                            'style="margin-left: 4px"onclick="Genre.remove('+i+')">'+
+                            '<span class="glyphicon glyphicon-remove"></span>'+
+                            '</button>'+
+                            '<div class="btn-group pull-right" role="group">'+
+                            '<button type="button" class="btn btn-default"onclick="Genre.up('+i+')">'+
+                            '<span class="glyphicon glyphicon-chevron-up"></span>'+
+                            '</button>'+
+                            '<button type="button" class="btn btn-default"onclick="Genre.down('+i+')">'+
+                            '<span class="glyphicon glyphicon-chevron-down"></span>'+
+                            '</button>'+
+                            '</div>'+
+                            '</li>'
+                        );
+                    }
+                },
+
+                showFreeList: function () {
+                    var elem = $('#menuGenres');
+                    elem.html('');
+                    for (var i in this.freeGenres) {
+                        elem.append(
+                            '<li role="presentation" onclick="Genre.add('+i+')"><a>'+
+                            this.freeGenres[i].name+
+                            '</a></li>'
+                        );
+                    }
+                },
+
+                refreshFree: function () {
+                    var t = this.allGenres.slice(0, this.allGenres.length);
+                    var k;
+                    for (var i = 0; i < this.genres.length; i++) {
+                        k = -1;
+                        for (var j = 0; j < t.length; j++) {
+                            if (t[j].id == this.genres[i].id) {
+                                k = j;
+                                break;
+                            }
+                        }
+                        if (k >= 0)
+                            t.splice(k, 1);
+                    }
+                    this.freeGenres = t;
+                    this.showFreeList();
+                },
+
+                getDrawingGenres: function(callback) {
+                    var This = this;
+                    if (isNewEntry)
+                        callback();
+                    else
+                        $.getJSON(getDrawingGenresUrl, function (data){
+                            This.genres = data;
+                            This.showList();
+                            callback();
+                        });
+                },
+
+                getAllGenres: function() {
+                    var This = this;
+                    return $.getJSON(getGenresUrl,
+                        function(data1){
+                            This.allGenres = data1;
+                            This.refreshFree();
+                        });
+                },
+
+                init: function(){
+                    var clbk = this.getAllGenres.bind(this);
+                    this.getDrawingGenres(clbk);
+                }
+            };
+
+            Genre.init();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% load staticfiles %}
+    {% static 'gallery/img/default_img.png' as default_img %}
+    {% if drawing %}
+    {% url 'drawing-edit' pk=drawing.pk as form_url %}
+    {% else %}
+    {% url 'drawing-create' as form_url %}
+    {% endif %}
+    <form action="{{ form_url }}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-lg-8">
+                <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" id="imgPreview"
+                     src="{% if drawing.image %}
+                              {{ drawing.image.url}}
+                          {% else %}
+                              {{ default_img }}
+                          {% endif %}">
+                <div class="well center-block" style="margin-top: 12px; max-width: 400px;">
+                    <input type="file" id="exampleInputFile" name="{{ form.image.html_name }}" style="display: none;">
+                    <label for="exampleInputFile" class="btn btn-primary btn-lg btn-block">Upload</label>
+                    <a href="{% url 'artist-detail' user.pk %}" style="margin-top: 12px" type="button" class="btn btn-warning btn-lg">
+                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    </a>
+                    <button style="margin-top: 12px" type="submit" class="btn btn-success btn-lg pull-right">
+                        <span class="glyphicon glyphicon-ok"></span> OK
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="affix pull-right panel">
+                    <div class="row">
+                        <div class="col-xs-6 col-md-3">
+                            <label class="h4" for="{{ form.name.id_for_label }}">Name</label>
+                            <input type="text" class="form-control" placeholder="Name"
+                                   name="{{ form.name.html_name }}"
+                                   id="{{ form.name.id_for_label }}"
+                                   value="{% firstof form.name.value '' %}">
+                            <label class="h4" for="{{ form.description.id_for_label }}">Description</label>
+                            <textarea type="text" class="form-control" placeholder="Name"
+                                   id="{{ form.description.id_for_label }}"
+                                   name="{{ form.description.html_name }}">{% firstof form.description.value '' %}</textarea>
+                            <h4>Genres</h4>
+                            <ul class="list-group" id="genreList">
+                            </ul>
+                            <div class="dropdown">
+                                <button class="btn btn-primary pull-right" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </button>
+                                <ul id="menuGenres" class="dropdown-menu pull-right" role="menu" aria-labelledby="drop6">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

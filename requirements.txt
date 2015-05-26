@@ -1,0 +1,8 @@
+Django==1.8
+psycopg2==2.5.4
+gunicorn==19.3.0
+dj-database-url==0.3.0
+whitenoise==1.0.6
+Pillow==2.8.1
+django-extensions==1.5.3
+django-grappelli==2.6.4
