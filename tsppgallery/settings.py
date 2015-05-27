@@ -69,19 +69,11 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gallery.context_processor.genres',
             ],
         },
     },
 ]
-
-from django.conf import global_settings
-
-TEMPLATE_CONTEXT_PROCESSORS =\
-    global_settings.TEMPLATE_CONTEXT_PROCESSORS +\
-    (
-        'django.core.context_processors.request',
-        'gallery.context_processor.processor'
-    )
 
 
 WSGI_APPLICATION = 'tsppgallery.wsgi.application'
