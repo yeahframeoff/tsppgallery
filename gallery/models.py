@@ -96,8 +96,8 @@ class DrawingWithCountManager(models.Manager):
 
 class Drawing(models.Model):
     image = models.ImageField('зображення', upload_to='images/%Y/%m/')
-    name = models.CharField('назва', max_length=32, default='Drawing', blank=True)
-    description = models.TextField('детальний опис', default='', blank=True)
+    name = models.CharField('назва', max_length=32)
+    description = models.TextField('детальний опис')
     artist = models.ForeignKey(Artist,
                                verbose_name='художник',
                                related_name='drawings',
@@ -138,7 +138,7 @@ class Exhibition(models.Model):
                                   verbose_name='організатор',
                                   related_name='exhibitions',
                                   related_query_name='exhibition')
-    name = models.CharField('назва', max_length=32, default='Exhibition', blank=True)
+    name = models.CharField('назва', max_length=32)
     publish_date = models.DateField('дата публікації', auto_now=True)
     approved = models.BooleanField('виставку перевірено', default=False)
     genres = models.ManyToManyField(
@@ -149,7 +149,7 @@ class Exhibition(models.Model):
         related_name='exhibitions',
         related_query_name='exhibition'
     )
-    description = models.TextField('Детальний опис', default='', blank=True)
+    description = models.TextField('Детальний опис')
 
     def get_absolute_url(self):
         return reverse('exhibition-detail',args=[self.pk])
