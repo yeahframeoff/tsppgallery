@@ -76,8 +76,19 @@ class Organizer(User):
             return exhibition.organizer_id == self.id
 
 
+name_regex = re.compile(r'^[А-Яа-яA-Za-z\w\s\.\,]+$')
+
+
 class Genre(models.Model):
-    name = models.CharField('название', max_length=32)
+    name = models.CharField('название', max_length=32,
+        validators=[
+            validators.RegexValidator(name_regex,
+                                      _('Название должно содержать '
+                                        'только буквы латинского или '
+                                        'кириллического алфавита.'),
+                                      'invalid'),
+        ],
+    )
     __str__ = lambda self: self.name
 
     def get_related_exhibitions_page_url(self):
@@ -94,9 +105,6 @@ class Genre(models.Model):
 class DrawingWithCountManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().annotate(Count('exhibition'))
-
-
-name_regex = re.compile(r'^[А-Яа-яA-Za-z\w\s\.\,]+$')
 
 
 class Drawing(models.Model):
