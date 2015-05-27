@@ -44,6 +44,7 @@ def main(request):
     else:
         return HttpResponseRedirect(reverse('login'))
 
+
 def register(request):
     if not request.user.is_anonymous():
         logout(request)
@@ -60,6 +61,7 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
+
 
 class LoginRequiredMixin:
     @classmethod
@@ -93,13 +95,13 @@ class DrawingForm(forms.ModelForm):
         fields = ('name', 'image', 'description')
 
     def save(self, commit=True):
-        instance = super().save()
+        drawing = super().save()
         exhibition_drawings_ids_list = parse_ordered_ids_list(self.exhibition_drawings_ids_list)
         bulk = []
         for num, id in exhibition_drawings_ids_list:
             bulk.append(DrawingGenre(genre_id=id, priority=num))
-        Drawing.objects.get(pk=instance.pk).drawinggenre_set = bulk
-        return instance
+        drawing.drawinggenre_set = bulk
+        return drawing
 
 
 @user_passes_test(User.check_artist)
@@ -114,7 +116,6 @@ def create_drawing(request):
     else:
         form = DrawingForm()
     return render(request, 'drawing/edit.html', {'form': form})
-
 
 
 class DrawingEditView(LoginRequiredMixin, genericviews.UpdateView):
@@ -241,17 +242,16 @@ class ExhibitionForm(forms.ModelForm):
         fields = ('name', 'description')
 
     def save(self, commit=True):
-        instance = super().save()
+        xzibit = super().save()
         exhibition_genres_ids_list = parse_ordered_ids_list(self.exhibition_genres_ids_list)
+        exhibition_drawings_ids_list = parse_ids_list(self.exhibition_drawings_ids_list)
         bulk = []
         for num, id in exhibition_genres_ids_list:
             bulk.append(ExhibitionGenre(genre_id=id, priority=num))
 
-        xzibit = Exhibition.objects.get(pk=instance.pk)
         xzibit.exhibitiongenre_set = bulk
-        exhibition_drawings_ids_list = parse_ids_list(self.exhibition_drawings_ids_list)
         xzibit.drawings = exhibition_drawings_ids_list
-        return instance
+        return xzibit
 
 
 @user_passes_test(User.check_organizer)
@@ -314,6 +314,7 @@ class ViewReturnJsonMixin(object):
 
 class ViewAjaxGetMixin(LoginRequiredMixin, ViewAjaxOnlyMixin, ViewReturnJsonMixin):
     pass
+
 
 class GenresView(ViewAjaxGetMixin, genericviews.ListView):
     fields_to_serialize = ('id', 'name')
