@@ -18,11 +18,11 @@ class Role(models.CharField):
     ORGANIZER = 'OR'
 
     ROLES_FORM_LIST = (
-        (ARTIST, 'Artist'),
-        (ORGANIZER, 'Organizer')
+        (ARTIST, 'Художник'),
+        (ORGANIZER, 'Организатор')
     )
 
-    ROLES_LIST = ROLES_FORM_LIST + ((ADMIN, 'Admin'),)
+    ROLES_LIST = ROLES_FORM_LIST + ((ADMIN, 'Администратор'),)
 
     def __init__(self, *args, **kwargs):
         upd = {

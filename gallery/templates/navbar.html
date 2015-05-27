@@ -9,21 +9,21 @@
 			</button>
             {% if user.is_artist %}
                 <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
-                    <span class="glyphicon glyphicon-pencil"></span> Add drawing
+                    <span class="glyphicon glyphicon-pencil"></span> Добавить картину
                 </a>
             {% elif user.is_organizer %}
                 <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
-                    <span class="glyphicon glyphicon-th"></span> Add Exhibition
+                    <span class="glyphicon glyphicon-th"></span> Добавить выставку
                 </a>
             {% endif %}
         </div>
         <div class="nav navbar-nav">
-            <li><a href="{% url 'exhibitions-index' %}">Exhibitions</a></li>
-            <li><a href="{% url 'drawings-index' %}">Drawings</a></li>
+            <li><a href="{% url 'exhibitions-index' %}">Выставки</a></li>
+            <li><a href="{% url 'drawings-index' %}">Картины</a></li>
         </div>
         <div class="nav navbar-nav navbar-right">
-            <p class="navbar-text">You are logged in as <a href="{{ user.get_absolute_url }}"><em>{{ user.full_name }}</em></a></p>
-            <li><a href="{% url 'logout' %}">Log Out</a></li>
+            <p class="navbar-text">Вы вошли как <a href="{{ user.get_absolute_url }}"><em>{{ user.full_name }}</em></a></p>
+            <li><a href="{% url 'logout' %}">Выйти</a></li>
         </div>
     </div>
 </nav>

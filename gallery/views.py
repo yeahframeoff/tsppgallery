@@ -19,13 +19,13 @@ import json
 
 
 def parse_ids_list(ids_list_str):
-    if len(ids_list_str.strip()) == 0:
+    if not ids_list_str or len(ids_list_str.strip()) == 0:
         return []
     return [int(id) for id in ids_list_str.split(',')]
 
 
 def parse_ordered_ids_list(ids_list_str):
-    if len(ids_list_str.strip()) == 0:
+    if not ids_list_str or len(ids_list_str.strip()) == 0:
         return []
     ids_list = ids_list_str.split(',')
     length = len(ids_list_str)
@@ -384,8 +384,8 @@ def update_drawing_genres_order(request, drawing_id):
     if not request.user.owns_drawing(drawing_id):
         return HttpResponseForbidden('Artists can edit '
                                      'only their own drawings')
-    ids_list = request.POST.get('ids_order', None)
-    if not ids_list:
+    ids_list = request.POST.get('ids_order', True)
+    if ids_list is True:
         return HttpResponseBadRequest()
     ids_list = parse_ordered_ids_list(ids_list)
     bulk = []
@@ -401,8 +401,8 @@ def update_exhibition_genres_order(request, exhibition_id):
     if not request.user.owns_exhibition(exhibition_id):
         return HttpResponseForbidden('Organizers can edit '
                                      'only their own exhibitions')
-    ids_list = request.POST.get('ids_order', None)
-    if not ids_list:
+    ids_list = request.POST.get('ids_order', True)
+    if ids_list is True:
         return HttpResponseBadRequest()
     ids_list = parse_ordered_ids_list(ids_list)
     bulk = []
@@ -432,8 +432,8 @@ def update_exhibition_drawings_list(request, exhibition_id):
     if not request.user.owns_exhibition(exhibition_id):
         return HttpResponseForbidden('Organizers can edit '
                                      'only their own exhibitions')
-    ids_list = request.POST.get('ids_order', None)
-    if not ids_list:
+    ids_list = request.POST.get('ids_order', True)
+    if ids_list is True:
         return HttpResponseBadRequest()
     ids_list = parse_ids_list(ids_list)
     Exhibition.objects.get(pk=exhibition_id).drawings = ids_list

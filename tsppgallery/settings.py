@@ -95,7 +95,7 @@ GRAPPELLI_ADMIN_TITLE = 'Witnesses & Yegors: Gallery'
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'uk-ua'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Kiev'
 

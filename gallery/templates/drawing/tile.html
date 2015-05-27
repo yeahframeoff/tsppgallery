@@ -20,12 +20,17 @@
                     {% endif %}
                 {% endblock %}
             </h4>
-            <h5>Genres:
-                {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
-                    <a href="{{ genre.get_related_drawings_page_url }}" class="label label-default">{{ genre }}</a>
-                {% endfor %}
-            </h5>
+            {% if drawing.genres.all|length > 0 %}
+                <h5>Жанры:
+                    {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
+                        <a href="{{ genre.get_related_drawings_page_url }}"
+                           class="label label-default">
+                            {{ genre }}
+                        </a>
+                    {% endfor %}
+                </h5>
+            {% endif %}
         </div>
-        {% include 'drawing/edit-btn-span.html' with drawing=drawing user=user %}
+        {% include 'drawing/edit-btn-span.html' %}
     </div>
 </div>

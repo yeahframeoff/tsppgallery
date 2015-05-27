@@ -1,5 +1,5 @@
 {% extends 'exhibition/tile.html' %}
 {% block header %}
-    {{ block.super }}
+    <strong>{{ block.super }}</strong>
     by <a href="{{ xzibit.organizer.get_absolute_url }}">{{ xzibit.organizer.full_name }}</a>
 {% endblock %}

@@ -22,7 +22,7 @@
                     </a>
                 </div>
             {% endfor %}
-            {% include 'exhibition/edit-btn-span.html' with xzibit=xzibit user=user %}
+            {% include 'exhibition/edit-btn-span.html' %}
         </div>
         <h5>
             {% for genre in xzibit.genres.all|order_by:'exhibitiongenre__priority' %}

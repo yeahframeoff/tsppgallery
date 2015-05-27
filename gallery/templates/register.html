@@ -6,8 +6,8 @@
     <div id="signupbox" style="margin-top:50px" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <div class="panel-title">Sign Up</div>
-                <div style="float:right; font-size: 85%; position: relative; top:-10px"><a href="{% url 'login' %}">Sign In</a></div>
+                <div class="panel-title">Регистрация</div>
+                <div style="float:right; font-size: 85%; position: relative; top:-10px"><a href="{% url 'login' %}">Войти &gt;&gt;</a></div>
             </div>
             <div class="panel-body" >
                 <form id="signupform" class="form-horizontal"
@@ -24,11 +24,11 @@
                     </div>
 
                     <div class="form-group {% if form.username.errors %} has-error has-feedback {% endif %}">
-                        <label for="{{ form.username.id_for_label }}" class="col-md-3 control-label">Username</label>
+                        <label for="{{ form.username.id_for_label }}" class="col-md-3 control-label">Логин</label>
                         <div class="col-md-9">
                             <input id="{{ form.username.id_for_label }}" type="text" class="form-control"
                                    name="{{ form.username.html_name }}" value="{% firstof form.username.value '' %}"
-                                   placeholder="Username">
+                                   placeholder="{{ form.username.label }}">
                             {% if form.username.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -43,7 +43,7 @@
                         <div class="col-md-9">
                             <input id="{{ form.email.id_for_label }}" type="email" class="form-control"
                                    name="{{ form.email.html_name }}" value="{% firstof form.email.value '' %}"
-                                   placeholder="Email Address">
+                                   placeholder="{{ form.email.label }}">
                             {% if form.email.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -54,11 +54,11 @@
                     </div>
 
                     <div class="form-group {% if form.first_name.errors %} has-error has-feedback {% endif %}">
-                        <label for="{{ form.first_name.id_for_label }}" class="col-md-3 control-label">First Name</label>
+                        <label for="{{ form.first_name.id_for_label }}" class="col-md-3 control-label">{{ form.first_name.label }}</label>
                         <div class="col-md-9">
                             <input id="{{ form.first_name.id_for_label }}" type="text" class="form-control"
                                    name="{{ form.first_name.html_name }}" value="{% firstof form.first_name.value '' %}"
-                                   placeholder="First Name">
+                                   placeholder="{{ form.first_name.label }}">
                             {% if form.first_name.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -69,11 +69,11 @@
                     </div>
 
                     <div class="form-group {% if form.last_name.errors %} has-error has-feedback {% endif %}">
-                        <label for="{{ form.password.id_for_label }}" class="col-md-3 control-label">Last Name</label>
+                        <label for="{{ form.password.id_for_label }}" class="col-md-3 control-label">{{ form.last_name.label }}</label>
                         <div class="col-md-9">
                             <input id="{{ form.last_name.id_for_label }}" type="text" class="form-control"
                                    name="{{ form.last_name.html_name }}" value="{% firstof form.last_name.value '' %}"
-                                   placeholder="Last Name">
+                                   placeholder="{{ form.last_name.label }}">
                             {% if form.last_name.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -84,11 +84,11 @@
                     </div>
 
                     <div class="form-group {% if form.password1.errors %} has-error has-feedback {% endif %}">
-                        <label for="{{ form.password1.id_for_label }}" class="col-md-3 control-label">Password</label>
+                        <label for="{{ form.password1.id_for_label }}" class="col-md-3 control-label">{{ form.password1.label }}</label>
                         <div class="col-md-9">
                             <input id="{{ form.password1.id_for_label }}" type="password" class="form-control"
                                    name="{{ form.password1.html_name }}" value="{% firstof form.password1.value '' %}"
-                                   placeholder="Password">
+                                   placeholder="Введите пароль">
                             {% if form.password1.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -99,11 +99,11 @@
                     </div>
 
                     <div class="form-group {% if form.password2.errors %} has-error has-feedback {% endif %}">
-                        <label for="{{ form.password2.id_for_label }}" class="col-md-3 control-label">Confirm Password</label>
+                        <label for="{{ form.password2.id_for_label }}" class="col-md-3 control-label">{{ form.password2.label }}</label>
                         <div class="col-md-9">
                             <input id="{{ form.password2.id_for_label }}" type="password" class="form-control"
                                    name="{{ form.password2.html_name }}" value="{% firstof form.password2.value '' %}"
-                                   placeholder="Repeat Password">
+                                   placeholder="Введите пароль еще раз">
                             {% if form.password2.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             {% endif %}
@@ -114,7 +114,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="icode" class="col-md-3 control-label">Role</label>
+                        <label for="icode" class="col-md-3 control-label">Роль</label>
                         <div class="col-md-9">
                         {% load templatetags %}
                             {{ form.role|add_class:'form-control' }}
@@ -126,7 +126,7 @@
                             <input id="{{ form.photo.id_for_label }}" type="file"
                                    name="{{ form.photo.html_name }}"
                                    style="display: none">
-                            <label for="{{ form.photo.id_for_label }}" class="btn btn-primary btn-block">Choose photo</label>
+                            <label for="{{ form.photo.id_for_label }}" class="btn btn-primary btn-block">Выбрать фото</label>
 
                             {% if form.photo.errors %}
                                 <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
@@ -140,8 +140,7 @@
                     <div class="form-group">
                         <!-- Button -->
                         <div class="col-md-offset-3 col-md-9">
-                            <input id="btn-signup" type="submit" class="btn btn-info" value="&nbsp Sign Up">
-{#                          <button id="btn-signup" type="button" class="btn btn-info"><i class="icon-hand-right"></i> &nbsp Sign Up</button>#}
+                            <input id="btn-signup" type="submit" class="btn btn-info" value="Зарегистрироваться">
                         </div>
                     </div>
 

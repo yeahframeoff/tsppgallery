@@ -22,17 +22,19 @@
     {% load templatetags %}
     <div class="row">
         <div class="col-lg-8">
-            {% if not artist.drawings.all %}
-                <h4>There are no drawings yet. <em>Create the first one!</em></h4>
-                <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
-                    <span class="glyphicon glyphicon-pencil"></span> Add drawing
-                </a>
-            {% else %}
+            {% if artist.drawings.all %}
                 <div class="list-group">
                 {% for drawing in artist.drawings.all %}
                     {% include 'drawing/tile.html' %}
                 {% endfor %}
                 </div>
+            {% elif user == artist %}
+                <h4>Здесь пока что нет картин. <em>Добавьте свою первую картину прямо сейчас!</em></h4>
+                <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
+                    <span class="glyphicon glyphicon-pencil"></span> Добавить картину
+                </a>
+            {% else %}
+                <h4>Здесь пока что нет картин. :\</h4>
             {% endif %}
         </div>
         <div class="col-lg-4">

@@ -37,14 +37,18 @@
                 <div class="row">
                     <div class="col-xs-6 col-md-3">
                         <h4>by <a href="{{ drawing.artist.get_absolute_url }}">{{ drawing.artist.full_name }}</a></h4>
-                        <h3>Genres</h3>
-                        <ul class="list-group">
-                            {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
-                            <li class="list-group-item" style="height: 56px; line-height: 34px;">
-                                <a href="{{ genre.get_related_drawings_page_url }}">{{ genre.name }}</a>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                        {% if drawing.genres.all|length > 0 %}
+                            <h3>Жанры</h3>
+                            <ul class="list-group">
+                                {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
+                                <li class="list-group-item" style="height: 56px; line-height: 34px;">
+                                    <a href="{{ genre.get_related_drawings_page_url }}">{{ genre.name }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <h3>Без жанров</h3>
+                        {% endif %}
                     </div>
                 </div>
             </div>

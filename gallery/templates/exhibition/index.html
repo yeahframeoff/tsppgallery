@@ -2,11 +2,13 @@
 
 {% block title %}
     {% if genre %}
-        Exhibitions of genre "{{ genre }}"
+        Выставки жанра "{{ genre }}"
     {% elif drawing %}
-        Exhibitions with drawing #{{ drawing.pk }}" {{ drawing }}"
+        Выставки с картиной #{{ drawing.pk }}" {{ drawing }}"
+    {% elif exhibitions %}
+        Все выставки
     {% else %}
-        Exhibitions
+        Нет выставок :\
     {% endif %}
 {% endblock %}
 
@@ -48,7 +50,7 @@
         <ul id="menuGenres" class="dropdown-menu" role="menu" aria-labelledby="drop6">
 			<li class="list	-group-item" style="height: 34px; line-height: 34px;">
 				<a href="/exhibitions?genre=0">
-					no genre
+					Без жанра
 				</a>
 			</li>
 		{% for genre in genres.all %}
@@ -61,12 +63,15 @@
         </ul>
     </div>
     {% if genre %}
-        <h3>Exhibitions of genre "{{ genre }}"</h3>
+        <h3>Выставки жанра "{{ genre }}"</h3>
     {% elif drawing %}
-        <h3>Exhibitions with drawing #{{ drawing.pk }}" {{ drawing }}"</h3>
+        <h3>Выставки с картиной #{{ drawing.pk }}" {{ drawing }}"</h3>
+    {% elif exhibitions %}
+        <h3>Все выставки</h3>
     {% else %}
-        <h3>Exhibitions</h3>
+        <h3>Нет выставок :\</h3>
     {% endif %}
+
     <div class="row">
         <div class="list-group">
             {% for xzibit in exhibitions %}

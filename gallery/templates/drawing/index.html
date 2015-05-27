@@ -2,9 +2,11 @@
 
 {% block title %}
     {% if genre %}
-        Drawings of genre "{{ genre }}"
+        Картины жанра "{{ genre }}"
+    {% elif drawings %}
+        Картины
     {% else %}
-        Drawings
+        Нет картин :\
     {% endif %}
 {% endblock %}
 
@@ -45,7 +47,7 @@
         <ul id="menuGenres" class="dropdown-menu" role="menu" aria-labelledby="drop6">
 			<li class="list	-group-item" style="height: 34px; line-height: 34px;">
 				<a href="{% url 'drawings-index' %}?genre=0">
-					no genre
+					Без жанра
 				</a>
 			</li>
 		{% for genre in genres.all %}
@@ -59,6 +61,14 @@
     </div>
     {% if genre %}
         <h3>Drawings of genre "{{ genre }}"</h3>
+    {% endif %}
+
+    {% if genre %}
+        <h3>Картины жанра "{{ genre }}"</h3>
+    {% elif drawings %}
+        <h3>Картины</h3>
+    {% else %}
+        <h3>Нет картин :\</h3>
     {% endif %}
     <div class="row">
         <div class="list-group">

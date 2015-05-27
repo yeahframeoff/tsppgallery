@@ -6,7 +6,7 @@
     <div id="loginbox" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
         <div class="panel panel-info" >
             <div class="panel-heading">
-                <div class="panel-title">Sign In</div>
+                <div class="panel-title">Вход</div>
             </div>
 
             <div style="padding-top:30px" class="panel-body" >
@@ -28,7 +28,7 @@
                     <div class="input-group {% if form.username.errors %} has-error has-feedback {% endif %}">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                         <input type="text" class="form-control" name="{{ form.username.html_name }}"
-                               value="{% firstof form.username.value '' %}" placeholder="Username or email">
+                               value="{% firstof form.username.value '' %}" placeholder="Логин">
                         {% if form.username.errors %}
                             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                         {% endif %}
@@ -41,7 +41,7 @@
                     <div style="margin-top: 25px" class="input-group {% if form.password.errors %} has-error has-feedback {% endif %}">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
                         <input type="password" class="form-control" name="{{ form.password.html_name }}"
-                               value="{% firstof form.password.value '' %}" placeholder="Password">
+                               value="{% firstof form.password.value '' %}" placeholder="Пароль">
                         {% if form.password.errors %}
                             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                         {% endif %}
@@ -51,20 +51,11 @@
                     {% endfor %}
 
 
-                    <div class="input-group" style="margin-top: 25px">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="remember" value="1"> Remember me
-                            </label>
-                        </div>
-                    </div>
-
-
                     <div style="margin-top:10px" class="form-group">
                         <!-- Button -->
 
                         <div class="col-sm-12 controls">
-                            <input type="submit" id="btn-login" class="btn btn-success" value="Login">
+                            <input type="submit" id="btn-login" class="btn btn-success" value="Войти">
                         </div>
                     </div>
 
@@ -72,8 +63,8 @@
                     <div class="form-group">
                         <div class="col-md-12 control">
                             <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
-                                Don't have an account?
-                                <a href="{% url 'register' %}">Sign Up Here</a>
+                                До сих пор не аккаунта?
+                                <a href="{% url 'register' %}">Зарегистрируйся!</a>
                             </div>
                         </div>
                     </div>

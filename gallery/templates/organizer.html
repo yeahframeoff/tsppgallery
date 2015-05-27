@@ -15,17 +15,20 @@
     {% static 'gallery/img/default_img_org.jpg' as default_ava %}
     <div class="row">
         <div class="col-lg-8">
-            {% if not org.exhibitions.all %}
-                <h4>There are no exhibitions yet. <em>Create the first one!</em></h4>
-                <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
-                    <span class="glyphicon glyphicon-th"></span> Add Exhibition
-                </a>
-            {% else %}
+            {% if org.exhibitions.all %}
                 <div class="list-group">
                 {% for xzibit in org.exhibitions.all %}
                     {% include 'exhibition/tile.html' %}
                 {% endfor %}
                 </div>
+
+            {% elif user == org %}
+                <h4>Здесь пока что нет выставок. <em>Добавьте свою первую выставку прямо сейчас!</em></h4>
+                <a class="btn btn-primary navbar-btn" href="{% url 'exhibition-create' %}">
+                    <span class="glyphicon glyphicon-th"></span> Добавить выставку
+                </a>
+            {% else %}
+                <h4>Здесь пока что нет выставок. :\</h4>
             {% endif %}
         </div>
         <div class="col-lg-4">
