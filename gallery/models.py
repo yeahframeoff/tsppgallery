@@ -1,6 +1,8 @@
+from django.core import validators
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Count
+import re
 from .gauth import Role, User, UserManager
 from django.utils.translation import ugettext_lazy as _
 
@@ -94,9 +96,20 @@ class DrawingWithCountManager(models.Manager):
         return super().get_queryset().annotate(Count('exhibition'))
 
 
+name_regex = re.compile(r'^[А-Яа-яA-Za-z]+$')
+
+
 class Drawing(models.Model):
     image = models.ImageField('зображення', upload_to='images/%Y/%m/')
-    name = models.CharField('назва', max_length=32)
+    name = models.CharField('назва', max_length=32,
+        validators=[
+            validators.RegexValidator(name_regex,
+                                      _('Название должно содержать '
+                                        'только буквы латинского или '
+                                        'кириллического алфавита.'),
+                                      'invalid'),
+        ],
+    )
     description = models.TextField('детальний опис')
     artist = models.ForeignKey(Artist,
                                verbose_name='художник',
@@ -127,7 +140,6 @@ class Drawing(models.Model):
         verbose_name_plural = 'малюнки'
 
 
-
 class Exhibition(models.Model):
     drawings = models.ManyToManyField(
         Drawing,
@@ -138,7 +150,16 @@ class Exhibition(models.Model):
                                   verbose_name='організатор',
                                   related_name='exhibitions',
                                   related_query_name='exhibition')
-    name = models.CharField('назва', max_length=32)
+    name = models.CharField('назва', max_length=32,
+        validators=[
+            validators.RegexValidator(name_regex,
+                                      _('Название должно содержать '
+                                        'только буквы латинского или '
+                                        'кириллического алфавита.'),
+                                      'invalid'),
+        ],
+    )
+    description = models.TextField('детальний опис')
     publish_date = models.DateField('дата публікації', auto_now=True)
     approved = models.BooleanField('виставку перевірено', default=False)
     genres = models.ManyToManyField(
@@ -149,7 +170,6 @@ class Exhibition(models.Model):
         related_name='exhibitions',
         related_query_name='exhibition'
     )
-    description = models.TextField('Детальний опис')
 
     def get_absolute_url(self):
         return reverse('exhibition-detail',args=[self.pk])

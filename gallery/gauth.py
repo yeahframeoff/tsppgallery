@@ -256,17 +256,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         })
     first_name = models.CharField(_('first name'), max_length=30, blank=True,
         validators=[
-            validators.RegexValidator(r'^[А-Яа-яA-Z][a-z]+$',
-                                      _('Enter a valid name. This value may '
-                                        'contain only small and capital letters.'),
+            validators.RegexValidator(r'^([А-Я][а-я]+)|([A-Z][a-z]+)$',
+                                      _('Имя должно быть введено в одной раскладке '
+                                        'и начинаться с заглавной буквы'),
                                       'invalid'),
         ],
     )
     last_name = models.CharField(_('last name'), max_length=30, blank=True,
         validators=[
-            validators.RegexValidator(r'^[А-Яа-яA-Z][a-z]+$',
-                                      _('Enter a valid name. This value may '
-                                        'contain only small and capital letters.'),
+            validators.RegexValidator(r'^([А-Я][а-я]+)|([A-Z][a-z]+)$',
+                                      _('Фамилия должна быть введена в одной раскладке '
+                                        'и начинаться с заглавной буквы'),
                                       'invalid'),
         ],
     )
