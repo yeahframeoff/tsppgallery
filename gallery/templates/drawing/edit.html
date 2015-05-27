@@ -38,6 +38,23 @@
 
     <script>
         $(function(){
+			function readURL(input) {
+				if (input.files && input.files[0]) {
+				    var reader = new FileReader();
+				    
+				    reader.onload = function (e) {
+				        $('#imgPreview').attr('src', e.target.result);
+				    }
+				    
+				    reader.readAsDataURL(input.files[0]);
+				}
+			}
+    
+			$("#exampleInputFile").change(function(){
+				readURL(this);
+			});
+
+
             const isNewEntry = {% if drawing %} false {% else %} true {% endif %};
             const updateGenresOrderUrl =
                 {% if drawing %}
@@ -223,7 +240,7 @@
         {% csrf_token %}
         <div class="row">
             <div class="col-lg-8">
-                <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block"
+                <img style="margin-top: 12px" class="img-thumbnail img-responsive center-block" id="imgPreview"
                      src="{% if drawing.image %}
                               {{ drawing.image.url}}
                           {% else %}

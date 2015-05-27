@@ -188,7 +188,6 @@ class ExhibitionsView(LoginRequiredMixin, genericviews.ListView):
             else:
                 qs = qs.annotate(genres_count=Count('genres'))\
                     .filter(genres_count=0)
-
         condition = Q(approved=True) | Q(approved=False, organizer=req.user)
         return qs.filter(condition)\
             .select_related('organizer').prefetch_related('drawings__genres')

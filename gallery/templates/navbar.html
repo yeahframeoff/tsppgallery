@@ -1,6 +1,12 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="nav navbar-nav navbar-left">
+			<button class="btn btn-primary" onclick="console.log(history)">
+				<span class="glyphicon glyphicon-arrow-left"></span> Назад
+			</button>
+            <button class="btn btn-primary" onclick="console.log(history)">
+				 Вперед <span class="glyphicon glyphicon-arrow-right"></span>
+			</button>
             {% if user.is_artist %}
                 <a class="btn btn-success navbar-btn" href="{% url 'drawing-create' %}">
                     <span class="glyphicon glyphicon-pencil"></span> Add drawing
