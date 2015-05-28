@@ -5,10 +5,10 @@
             <img src="{% static 'gallery/img/wandy_logo2.png' %}" height="50">
         </div>
         <div class="nav navbar-nav navbar-left">
-			<button class="btn btn-primary" onclick="history.back()">
+			<button class="btn btn-primary navbar-btn" onclick="history.back()">
 				<span class="glyphicon glyphicon-arrow-left"></span> Назад
 			</button>
-            <button class="btn btn-primary" onclick="history.forward()">
+            <button class="btn btn-primary navbar-btn" onclick="history.forward()">
 				 Вперед <span class="glyphicon glyphicon-arrow-right"></span>
 			</button>
             {% if user.is_artist %}
