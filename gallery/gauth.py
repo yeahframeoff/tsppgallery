@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth import forms as authforms
+from django.contrib.auth import forms as authforms, login, authenticate, logout
 from django.core import validators
 from django.db import models
 from django.contrib.auth.models import \
@@ -341,6 +341,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def owns_exhibition(self, exhibition):
         return False
+
+    # Proxy methods
+
+    def login(self, request, username, password):
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            self.__dict__ = user.__dict__
+            return True
+        else:
+            return False
+
+    def logout(self, request):
+        logout(request)
 
 
 class UserCreationForm(authforms.UserCreationForm):

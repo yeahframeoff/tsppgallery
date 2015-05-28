@@ -1,7 +1,9 @@
+import datetime
 from django.core import validators
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, QuerySet
 import re
 from .gauth import Role, User, UserManager
 from django.utils.translation import ugettext_lazy as _
@@ -12,7 +14,8 @@ class AdminManager(UserManager):
         return super().get_queryset().filter(role=Role.ADMIN)
 
     def create_user(self, username, email=None, password=None, **extra_fields):
-        return super().create_user(username, email, Role.ADMIN, password, **extra_fields)
+        return super().create_user(username, email, Role.ADMIN,
+                                   password, **extra_fields)
 
 
 class Admin(User):
@@ -25,13 +28,106 @@ class Admin(User):
     def get_absolute_url(self):
         return reverse('admin:index')
 
+    def add_genre(self, genre):
+        if isinstance(genre, str):
+            genre = Genre(name=genre)
+        elif not isinstance(genre, Genre):
+            raise ValueError('Genre param must be '
+                             'either string or Genre object')
+        genre.save()
+
+    def delete_genre(self, genre):
+        if isinstance(genre, int):
+            try:
+                genre = Genre.objects.get(pk=genre)
+            except Genre.DoesNotExist as e:
+                raise ValueError(e)
+        elif isinstance(genre, str):
+            try:
+                genre = Genre.objects.get(name__icontains=genre)
+            except Genre.DoesNotExist as e:
+                raise ValueError(e)
+        elif not isinstance(genre, Genre):
+            raise ValueError('Genre param must be '
+                             'either string, integer '
+                             'or Genre object')
+        genre.delete()
+
+    def delete_user(self, user):
+        if isinstance(user, int):
+            try:
+                user = User.objects.get(pk=user)
+            except Genre.DoesNotExist as e:
+                raise ValueError(e)
+        elif isinstance(user, str):
+            try:
+                user = User.objects.get(username__iexact=user)
+            except Genre.DoesNotExist as e:
+                raise ValueError(e)
+        elif not isinstance(user, User):
+            raise ValueError('User param must be either '
+                             'instance of string, integer '
+                             'or Genre object')
+        user.delete()
+
+    def _check_drawing(self, drawing):
+        if isinstance(drawing, int):
+            try:
+                drawing = Drawing.objects.get(pk=drawing)
+            except Drawing.DoesNotExist as e:
+                raise ValueError(e)
+        elif isinstance(drawing, str):
+            try:
+                drawing = Drawing.objects.get(name__icontains=drawing)
+            except Drawing.DoesNotExist as e:
+                raise ValueError(e)
+        elif not isinstance(drawing, Drawing):
+            raise ValueError('Drawing param must be '
+                             'either string, integer '
+                             'or Drawing object')
+        return drawing
+
+    def hide_image(self, drawing):
+        drawing = self._check_drawing(drawing)
+        drawing.hide()
+
+    def show_image(self, drawing):
+        drawing = self._check_drawing(drawing)
+        drawing.show()
+
+    def _check_exhibition(self, exhibition):
+        if isinstance(exhibition, int):
+            try:
+                exhibition = Exhibition.objects.get(pk=exhibition)
+            except Exhibition.DoesNotExist as e:
+                raise ValueError(e)
+        elif isinstance(exhibition, str):
+            try:
+                exhibition = Exhibition.objects.get(name__icontains=exhibition)
+            except Exhibition.DoesNotExist as e:
+                raise ValueError(e)
+        elif not isinstance(exhibition, Exhibition):
+            raise ValueError('Exhibition param must be '
+                             'either string, integer '
+                             'or Exhibition object')
+        return exhibition
+
+    def approve_exhibition(self, exhibition):
+        exhibition = self._check_exhibition(exhibition)
+        exhibition.approve()
+
+    def disapprove_exhibition(self, exhibition):
+        exhibition = self._check_exhibition(exhibition)
+        exhibition.disapprove()
+
 
 class ArtistManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(role=Role.ARTIST)
 
     def create_user(self, username, email=None, password=None, **extra_fields):
-        return super().create_user(username, email, Role.ARTIST, password, **extra_fields)
+        return super().create_user(username, email, Role.ARTIST,
+                                   password, **extra_fields)
 
 
 class Artist(User):
@@ -50,13 +146,45 @@ class Artist(User):
         else :
             return drawing.artist_id == self.id
 
+    def get_drawings(self):
+        return self.drawings
+
+    def create_drawing(self, name, description, image, genres=[]):
+        assert isinstance(name, str) and name
+        assert isinstance(description, str) and description
+        assert isinstance(image, InMemoryUploadedFile)
+        assert isinstance(genres, QuerySet) and genres.model is Genre \
+               or \
+               isinstance(genres, list) and (
+                   all(isinstance(genre, Genre) for genre in genres)
+                   or
+                   all(isinstance(genre, int) for genre in genres)
+               )
+        drawing = Drawing.objects.create(
+            name=name,
+            description=description,
+            artist=self,
+            image=image
+        )
+        length = len(genres)
+        if all(isinstance(genre, Genre) for genre in genres):
+            genres = (genre.id for genre in genres)
+        bulk = []
+        for num, id in zip(range(1, length + 1), genres):
+            bulk.append(DrawingGenre(genre_id=id, priority=num))
+
+        drawing.drawinggenre_set = bulk
+
+        return drawing
+
 
 class OrganizerManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(role=Role.ORGANIZER)
 
     def create_user(self, username, email=None, password=None, **extra_fields):
-        return super().create_user(username, email, Role.ORGANIZER, password, **extra_fields)
+        return super().create_user(username, email, Role.ORGANIZER,
+                                   password, **extra_fields)
 
 
 class Organizer(User):
@@ -74,6 +202,49 @@ class Organizer(User):
             return Exhibition.objects.filter(pk=exhibition, organizer=self.id).exists()
         else:
             return exhibition.organizer_id == self.id
+
+    def create_exhibition(self, name, description,
+                          publish_date, genres=[], drawings=[]):
+        assert isinstance(name, str) and name
+        assert isinstance(description, str) and description
+        assert isinstance(publish_date, datetime.date)
+        assert isinstance(genres, QuerySet) and genres.model is Genre \
+               or \
+               isinstance(genres, list) and (
+                   all(isinstance(genre, Genre) for genre in genres)
+                   or
+                   all(isinstance(genre, int) for genre in genres)
+               )
+        assert isinstance(drawings, QuerySet) and drawings.model is Drawing \
+               or \
+               isinstance(drawings, list) and (
+                   all(isinstance(drawing, Genre) for drawing in drawings)
+                   or
+                   all(isinstance(drawing, int) for drawing in drawings)
+               )
+        exhibition = Exhibition.objects.create(
+            name=name,
+            description=description,
+            publish_date=publish_date,
+            organizer=self
+        )
+        length = len(genres)
+        if all(isinstance(genre, Genre) for genre in genres):
+            genres = (genre.id for genre in genres)
+        bulk = []
+        for num, id in zip(range(1, length + 1), genres):
+            bulk.append(ExhibitionGenre(genre_id=id, priority=num))
+
+        exhibition.exhibitiongenre_set = bulk
+
+        if all(isinstance(drawing, Drawing) for drawing in drawings):
+            drawings = (drawing.id for drawing in drawings)
+
+        exhibition.drawings = drawings
+        return exhibition
+
+    def get_exhibitions(self):
+        return self.exhibitions
 
 
 name_regex = re.compile(r'^[А-Яа-яA-Za-z\w\s\.\,]+$')
@@ -101,6 +272,10 @@ class Genre(models.Model):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
 
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()
+
 
 class DrawingWithCountManager(models.Manager):
     def get_queryset(self):
@@ -108,6 +283,17 @@ class DrawingWithCountManager(models.Manager):
 
 
 class Drawing(models.Model):
+
+    def hide(self, save=True):
+        self._set_hidden(True, save)
+
+    def show(self, save=True):
+        self._set_hidden(False, save)
+
+    def _set_hidden(self, hidden, save=True):
+        self.hidden = hidden
+        if save: self.save(update_fields='hidden')
+
     image = models.ImageField('изображение', upload_to='images/%Y/%m/')
     name = models.CharField('название', max_length=32,
         validators=[
@@ -149,6 +335,17 @@ class Drawing(models.Model):
 
 
 class Exhibition(models.Model):
+
+    def approve(self, save=True):
+        self._set_approved(True, save)
+
+    def disapprove(self, save=True):
+        self._set_approved(False, save)
+
+    def _set_approved(self, approved, save=True):
+        self.approved = approved
+        if save: self.save(update_fields='approved')
+
     drawings = models.ManyToManyField(
         Drawing,
         related_name='exhibitions',
@@ -189,6 +386,18 @@ class Exhibition(models.Model):
         verbose_name = 'выставка'
         verbose_name_plural = 'выставки'
         ordering = ('id',)
+
+    def add_drawing(self, drawing):
+        assert isinstance(drawing, (int, Drawing))
+        self.drawings.add(drawing)
+
+    def remove_drawing(self, drawing):
+        assert isinstance(drawing, (int, Drawing))
+        self.drawings.remove(drawing)
+
+    @classmethod
+    def get_by_genre(cls, genre):
+        return cls.objects.filter(genres=genre)
 
 
 class DrawingGenre(models.Model):
