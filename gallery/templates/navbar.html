@@ -1,5 +1,9 @@
+{% load staticfiles %}
 <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
+    <div class="container-fluid">
+        <div class="nav navbar-header" style="padding: 5px; padding-right: 15px">
+            <img src="{% static 'gallery/img/wandy_logo2.png' %}" height="50">
+        </div>
         <div class="nav navbar-nav navbar-left">
 			<button class="btn btn-primary" onclick="history.back()">
 				<span class="glyphicon glyphicon-arrow-left"></span> Назад
@@ -22,7 +26,12 @@
             <li><a href="{% url 'drawings-index' %}">Картины</a></li>
         </div>
         <div class="nav navbar-nav navbar-right">
-            <p class="navbar-text">Вы вошли как <a href="{{ user.get_absolute_url }}"><em>{{ user.full_name }}</em></a></p>
+            <p class="navbar-text">
+                Вы вошли как
+                <a href="{{ user.get_absolute_url }}">
+                    <em>{{ user.full_name }}</em>
+                </a>
+            </p>
             <li><a href="{% url 'logout' %}">Выйти</a></li>
         </div>
     </div>

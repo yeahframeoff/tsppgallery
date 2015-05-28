@@ -24,9 +24,7 @@
                 <h5>Жанры:
                     {% for genre in drawing.genres.all|order_by:'drawinggenre__priority' %}
                         <a href="{{ genre.get_related_drawings_page_url }}"
-                           class="label label-default">
-                            {{ genre }}
-                        </a>
+                           class="label label-default">{{ genre }}</a>
                     {% endfor %}
                 </h5>
             {% endif %}
