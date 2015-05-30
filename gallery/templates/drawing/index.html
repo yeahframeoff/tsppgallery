@@ -8,12 +8,55 @@
     {% endif %}
 {% endblock %}
 
+{% block style %}
+    <style>
+
+		.dropdown{
+			height: 42px;
+		}
+
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        #menu3 {
+            max-height: 300px;
+            overflow: auto;
+        }
+        .genre-name{
+            width: calc(100% - 125px);
+            display: inline-block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-	<ul class="list-group" id="genreList">
-            {% for genre in genres %}
-               <li><a href="#" class="label label-default">qwe</a></li>
-            {% endfor %}
-    </ul>	
+    <div class="dropdown">
+        <button class="btn btn-default" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+			Поиск по жанрам
+        </button>
+        <ul id="menuGenres" class="dropdown-menu" role="menu" aria-labelledby="drop6">
+			<li class="list	-group-item" style="height: 34px; line-height: 34px;">
+				<a href="/drawings?genre=0">
+					no genre
+				</a>
+			</li>
+		{% for genre in genres.all %}
+			<li class="list	-group-item" style="height: 34px; line-height: 34px;">
+				<a href="{{ genre.get_related_drawings_page_url }}">
+					{{ genre }}
+				</a>
+			</li>
+		{% endfor %}
+        </ul>
+    </div>
     {% if genre %}
         <h3>Drawings of genre "{{ genre }}"</h3>
     {% endif %}

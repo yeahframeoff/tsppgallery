@@ -207,12 +207,6 @@ class DrawingsView(LoginRequiredMixin, genericviews.ListView):
     def get_queryset(self):
         req = self.request
         qs = Drawing.objects.all()
-<<<<<<< HEAD
-        genre_id = int(req.GET.get('genre', 0))
-        if genre_id:
-            self.genre_id = genre_id
-            qs = qs.filter(genres=genre_id)
-=======
         genre_id = req.GET.get('genre')
         if genre_id:
             genre_id = int(genre_id)
@@ -223,7 +217,6 @@ class DrawingsView(LoginRequiredMixin, genericviews.ListView):
                 qs = qs.annotate(genres_count=Count('genres'))\
                     .filter(genres_count=0)
 
->>>>>>> FETCH_HEAD
         condition = Q(hidden=False) | Q(hidden=True, artist=req.user)
         return qs.filter(condition)\
             .select_related('artist').prefetch_related('genres')
