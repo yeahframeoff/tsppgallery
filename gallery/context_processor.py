@@ -1,5 +1,5 @@
 from .models import Genre
 
-def processor(request):
+def genres(request):
     genres = Genre.objects.all()
     return {'genres': genres}
