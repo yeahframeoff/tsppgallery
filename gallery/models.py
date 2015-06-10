@@ -177,6 +177,7 @@ class Artist(User):
         drawing.drawinggenre_set = bulk
 
         return drawing
+        # ASSERTION FAIL
 
 
 class OrganizerManager(UserManager):

@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.contrib.auth.forms import AuthenticationForm
 from .gauth import UserCreationForm, Role
-from gallery.models import Artist, Admin, Genre, GenreForm
+from gallery.models import Artist, Admin, Genre, GenreForm, Drawing
 from collections import namedtuple
 
 
@@ -25,6 +25,7 @@ class LoginTest(TestCase):
         })
         print(form.errors)
         self.assertFalse(form.is_valid() )
+
 
     def test_wrong_data_shall_not_register(self):
         """
@@ -153,6 +154,7 @@ class LoginTest(TestCase):
             print(data_item.preferred_result)
             self.assertFalse(form.is_valid() ^ data_item.preferred_result )
 
+
     def test_admin_can_delete_user(self):
         """
         Admin can delete users of all roles
@@ -171,6 +173,7 @@ class LoginTest(TestCase):
         with self.assertRaises(Artist.DoesNotExist):
             Artist.objects.get(pk=user_pk)
 
+
     def test_admin_can_create_and_delete_genres(self):
         """
         Admin can create and delete genres
@@ -187,6 +190,7 @@ class LoginTest(TestCase):
         with self.assertRaises(Genre.DoesNotExist):
             Genre.objects.get(name__icontains=genre_text)
 
+
     def test_genres_must_be_valid(self):
         """
         Genres must contain valid characters
@@ -196,3 +200,77 @@ class LoginTest(TestCase):
         self.assertFalse(form.is_valid())
         form = GenreForm({'name': 'Valid text'})
         self.assertTrue(form.is_valid())
+
+
+class CreateDrawingTest(TestCase):
+    def test_create_drawing_with_bad_name(self):
+        """
+        If name is not string, AssertionError shoould be raised
+        """
+        artist = Artist.objects.create_user(
+            username='artistka',
+            password='1234'
+        )
+        not_string_obj = 10
+        with self.assertRaises(AssertionError):
+            artist.create_drawing(not_string_obj, None, None)
+
+    def test_create_drawing_with_bad_descripton(self):
+        """
+        If description is not string, AssertionError shoould be raised
+        """
+        artist = Artist.objects.create_user(
+            username='artistka',
+            password='1234'
+        )
+        name = 'Good name'
+        not_string_obj = []
+        with self.assertRaises(AssertionError):
+            artist.create_drawing(name, not_string_obj, None)
+
+    def test_create_drawing_with_bad_image(self):
+        """
+        If image is not UploadedFile, AssertionError shoould be raised
+        """
+        artist = Artist.objects.create_user(
+            username='artistka',
+            password='1234'
+        )
+        name = 'Good name'
+        description = 'Good description'
+        image = 'image.jpg'
+        with self.assertRaises(AssertionError):
+            artist.create_drawing(name, description, image)
+
+    def test_create_drawing_with_bad_genres(self):
+        """
+        If genres list is provided, it must be either
+             QuerySet of Genre model
+             or
+             list of genre objects
+             or
+             list of integers
+        if any of these fail, AssertionError is raised
+        """
+        artist = Artist.objects.create_user(
+            username='artistka',
+            password='1234'
+        )
+        name = 'Good name'
+        description = 'Good description'
+        filename = 'gallery/testdata/test_image_1.jpg'
+        make_image = lambda: SimpleUploadedFile(filename,
+                                                open(filename, 'rb').read())
+        bad_genres1 = Drawing.objects.all()  # returns queryset with model Drawing
+        bad_genres2 = [Drawing(), Genre()]   # there are non-Genre objects in list
+        bad_genres3 = [1, 2, 3, 'string']    # there are non-integers in list
+        for bad_genres in (bad_genres1, bad_genres2, bad_genres3):
+            with self.assertRaises(AssertionError):
+                artist.create_drawing(name,
+                                      description,
+                                      make_image(),
+                                      bad_genres)
+        good_genres = Genre.objects.all()    # returns queryset with model Genre
+        drawing = artist.create_drawing(name, description, make_image(), good_genres)
+        self.assertIsInstance(drawing, Drawing)
+
