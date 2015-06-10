@@ -1,4 +1,5 @@
 import datetime
+from django import forms
 from django.core import validators
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
@@ -275,6 +276,12 @@ class Genre(models.Model):
     @classmethod
     def get_all(cls):
         return cls.objects.all()
+
+
+class GenreForm(forms.ModelForm):
+    class Meta:
+        model = Genre
+        fields = '__all__'
 
 
 class DrawingWithCountManager(models.Manager):

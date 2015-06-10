@@ -1,14 +1,15 @@
 from unittest import skip
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.contrib.auth.forms import AuthenticationForm
 from .gauth import UserCreationForm, Role
-from gallery.models import Artist, Admin, Genre
+from gallery.models import Artist, Admin, Genre, GenreForm
 from collections import namedtuple
 
 
 class LoginTest(TestCase):
-    @skip
+
     def test_wrong_credentials_shall_not_pass(self):
         """
         If user inputs wrong data, auth form is invalid
@@ -25,7 +26,6 @@ class LoginTest(TestCase):
         print(form.errors)
         self.assertFalse(form.is_valid() )
 
-    @skip
     def test_wrong_data_shall_not_register(self):
         """
         username must match regex: r'^[A-Za-z0-9._]{4,20}$'
@@ -186,3 +186,13 @@ class LoginTest(TestCase):
         admin.delete_genre(genre_text)
         with self.assertRaises(Genre.DoesNotExist):
             Genre.objects.get(name__icontains=genre_text)
+
+    def test_genres_must_be_valid(self):
+        """
+        Genres must contain valid characters
+        and satisfy regex r'^[А-Яа-яA-Za-z\w\s\.\,]+$'
+        """
+        form = GenreForm({'name': '#$%GD'})
+        self.assertFalse(form.is_valid())
+        form = GenreForm({'name': 'Valid text'})
+        self.assertTrue(form.is_valid())
